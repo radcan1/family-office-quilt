@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Family Office Asset Quilt</title>
+<meta name="description" content="Monthly multi-asset quilt for an INR-based family office: asset classes, sectors, macro liquidity and prediction-market catalysts. Data as of 2026-11-27.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  --color-bg: #f5f6f8; --color-panel: #ffffff; --color-fg: #1a1e24; --color-fg-muted: #5b6471;
+  --color-border-line: #dfe3e8; --color-ok: #15803d; --color-warn: #b45309; --color-bad: #b91c1c;
+  --series-1: #c2410c; --series-2: #2563eb; --series-3: #0f766e; --series-4: #a16207; --series-5: #7c3aed;
+  --cds-chart-grid: #e6e9ee; --cds-surface-popover: #ffffff; --cds-border: #d5dae1;
+  --cds-shadow-popover: 0 6px 24px rgba(20, 28, 40, .14); --cds-text-secondary: #5b6471;
+  --font-anthropic-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-anthropic-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --cds-font-size-caption: 12.5px; --cds-font-size-body: 15px; --cds-font-size-heading: 18px; --cds-font-size-title: 30px;
+  --cds-font-weight-medium: 600;
+  --cds-gap-xs: 4px; --cds-gap-sm: 8px; --cds-gap-md: 12px; --cds-gap-lg: 20px; --cds-gap-xl: 36px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 18px; --cds-pad-xl: 28px;
+  --cds-radius: 8px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #111317; --color-panel: #191c21; --color-fg: #e6e8eb; --color-fg-muted: #9aa3ae;
+    --color-border-line: #2a2f37; --color-ok: #4ade80; --color-warn: #fbbf24; --color-bad: #f87171;
+    --series-1: #fb923c; --series-2: #60a5fa; --series-3: #2dd4bf; --series-4: #facc15; --series-5: #a78bfa;
+    --cds-chart-grid: #2a2f37; --cds-surface-popover: #1f2329; --cds-border: #353b44;
+    --cds-shadow-popover: 0 6px 24px rgba(0, 0, 0, .5); --cds-text-secondary: #9aa3ae;
+    color-scheme: dark;
+  }
+}
+html, body { margin: 0; background: var(--color-bg); color: var(--color-fg); }
+body { font: 15px/1.45 var(--font-anthropic-sans); -webkit-font-smoothing: antialiased; }
+#dash-root { max-width: 1320px; margin: 0 auto; padding-block: 32px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.dash-select { font: inherit; font-size: 13px; color: var(--color-fg); background-color: var(--color-panel);
+  border: 1px solid var(--color-border-line); border-radius: 6px; padding: 5px 28px 5px 10px; appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-fg-muted) 50%), linear-gradient(135deg, var(--color-fg-muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.dash-select:focus-visible, summary:focus-visible { outline: 2px solid var(--series-2); outline-offset: 2px; }
+.dash-skeleton { position: relative; min-height: 120px; }
+.dash-skeleton > * { visibility: hidden; }
+.dash-skeleton::after { content: ""; position: absolute; inset: 0; border-radius: var(--cds-radius);
+  background: linear-gradient(90deg, var(--color-border-line), var(--color-panel), var(--color-border-line)); background-size: 200% 100%; opacity: .5; }
+@media (prefers-reduced-motion: no-preference) { .dash-skeleton::after { animation: fqshimmer 1.4s linear infinite; } }
+@keyframes fqshimmer { from { background-position: 200% 0; } to { background-position: 0 0; } }
+.site-foot { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--color-border-line);
+  font-size: 12.5px; color: var(--color-fg-muted); display: flex; flex-direction: column; gap: 6px; max-width: 90ch; }
+.site-foot p { margin: 0; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+window.dash = (function () {
+  const SETS = ["layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"];
+  const store = {}; SETS.forEach(s => { store[s] = { status: 'loading', data: [] }; });
+  const draws = new Map();
+  let started = false;
+  const run = (name) => {
+    const fn = draws.get(name); if (!fn) return;
+    document.querySelectorAll('[data-draw="' + name + '"]').forEach(el => {
+      if (el.closest('[hidden]')) return;
+      try { fn(el); } catch (e) { console.error('draw ' + name, e); }
+    });
+  };
+  const runAll = () => draws.forEach((_, n) => run(n));
+  document.addEventListener('DOMContentLoaded', () => {
+    started = true; runAll();
+    SETS.forEach(s => fetch('data/' + s + '.json', { cache: 'no-cache' })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(j => { store[s] = { status: 'ok', data: j.rows || j }; runAll(); })
+      .catch(() => { store[s] = { status: 'error', data: [] }; runAll(); }));
+  });
+  return {
+    data: (id) => store[id] || { status: 'missing', data: [] },
+    draw(name, fn) {
+      if (fn) { draws.set(name, typeof fn === 'function' ? fn : (el) => (fn.update || fn.mount)(el)); if (started) run(name); }
+      else run(name);
+    },
+    onData(fn) { fn(); },
+    colors: ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)', 'var(--series-5)'],
+    setLink() {}, params: () => ({}), setParams() {}, resetParams() {}, refresh() {},
+  };
+})();
+</script>
+</head>
+<body>
+<main id="dash-root">
+<style>
+  .fq { display: flex; flex-direction: column; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+  .fq h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .fq h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; text-wrap: balance; }
+  .fq h3 { font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); text-transform: uppercase; letter-spacing: .06em; color: var(--color-fg-muted); margin: 0; }
+  .fq p { margin: 0; max-width: 72ch; line-height: 1.5; }
+  .fq-muted { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .fq-head { display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+  .fq-take { font-size: var(--cds-font-size-body); }
+  .fq-section { display: flex; flex-direction: column; gap: var(--cds-gap-md); }
+  .fq-sechead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-sm); }
+  .fq-num { font-variant-numeric: tabular-nums; }
+  .fq-neg { color: var(--color-bad); }
+
+  /* Layer 1 */
+  .fq-macro { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--cds-gap-md); }
+  .fq-group { display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+  .fq-cards { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); min-height: 120px; }
+  .fq-ind { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--cds-gap-sm); padding: var(--cds-pad-sm) var(--cds-pad-md); border-top: 1px solid var(--color-border-line); }
+  .fq-ind:first-child { border-top: 0; }
+  .fq-ind-label { font-size: var(--cds-font-size-caption); min-width: 0; }
+  .fq-ind-val { font-variant-numeric: tabular-nums; font-weight: var(--cds-font-weight-medium); text-align: right; }
+  .fq-ind-chg { grid-column: 1 / -1; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+
+  /* Quilt */
+  .fq-tools { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; }
+  .fq-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fq-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .fq-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .fq-scroll { overflow-x: auto; position: relative; }
+  .fq-wrap { position: relative; }
+  .fq-quilt { display: grid; gap: 3px; min-height: 300px; }
+  .fq-quilt.fq-small { min-height: 240px; }
+  .fq-colhead { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-align: center; padding-bottom: 2px; white-space: nowrap; }
+  .fq-colhead.fq-mtd { font-style: italic; }
+  .fq-rankcell { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+  .fq-cell { border-radius: 4px; padding: 4px 6px; border-left: 3px solid transparent; display: flex; flex-direction: column; justify-content: center; min-height: 36px; cursor: pointer; transition: opacity .12s; overflow: hidden; }
+  .fq-cell b { font-size: 11.5px; font-weight: var(--cds-font-weight-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fq-cell span { font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .fq-cell.fq-mtdcell { border-style: dashed; border-left-style: solid; outline: 1px dashed var(--color-border-line); outline-offset: -1px; }
+  .fq-dim .fq-cell:not(.fq-hl) { opacity: .28; }
+  .fq-cell.fq-hl { box-shadow: 0 0 0 1.5px var(--color-fg); }
+  .fq-tip { position: absolute; z-index: 5; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); font-size: var(--cds-font-size-caption); min-width: 200px; max-width: 260px; }
+  .fq-tip dl { display: grid; grid-template-columns: auto auto; gap: 2px var(--cds-gap-md); margin: 6px 0 0; }
+  .fq-tip dt { color: var(--cds-text-secondary); }
+  .fq-tip dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Tables */
+  .fq-tablewrap { overflow-x: auto; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); }
+  .fq-table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); }
+  .fq-table th, .fq-table td { padding: 6px 10px; text-align: right; white-space: nowrap; border-top: 1px solid var(--color-border-line); }
+  .fq-table thead th { border-top: 0; color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); }
+  .fq-table th:first-child, .fq-table td:first-child { text-align: left; }
+  .fq-table td.fq-l { text-align: left; white-space: normal; }
+  .fq-table tbody tr:hover { background: color-mix(in srgb, var(--color-fg) 4%, transparent); }
+
+  .fq-pill { display: inline-block; font-size: 10.5px; letter-spacing: .03em; padding: 1px 6px; border-radius: 999px; margin: 1px 4px 1px 0; border: 1px solid var(--color-border-line); color: var(--color-fg-muted); white-space: nowrap; }
+  .fq-pill.fq-up { color: var(--color-ok); border-color: color-mix(in srgb, var(--color-ok) 45%, transparent); }
+  .fq-pill.fq-down { color: var(--color-bad); border-color: color-mix(in srgb, var(--color-bad) 45%, transparent); }
+  .fq-pill.fq-warn { color: var(--color-warn); border-color: color-mix(in srgb, var(--color-warn) 45%, transparent); }
+
+  /* Sectors */
+  .fq-sectors { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--cds-gap-lg); }
+  .fq-sectors > div { min-width: 0; display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+
+  /* Catalysts */
+  .fq-cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--cds-gap-md); min-height: 160px; }
+  .fq-cat { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-md); display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+  .fq-cat-h { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); align-items: baseline; }
+  .fq-cat-h strong { font-weight: var(--cds-font-weight-medium); }
+  .fq-out { display: grid; grid-template-columns: minmax(0, 1fr) 52px 64px; gap: 2px var(--cds-gap-sm); align-items: center; font-size: var(--cds-font-size-caption); }
+  .fq-bar { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--cds-chart-grid); overflow: hidden; }
+  .fq-bar i { display: block; height: 100%; }
+  .fq-out .fq-num { text-align: right; }
+
+  .fq details { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
+  .fq summary { cursor: pointer; font-weight: var(--cds-font-weight-medium); }
+  .fq dl.fq-defs { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: var(--cds-gap-sm) var(--cds-gap-lg); margin: var(--cds-gap-md) 0 0; font-size: var(--cds-font-size-caption); }
+  .fq dl.fq-defs dt { font-weight: var(--cds-font-weight-medium); }
+  .fq dl.fq-defs dd { margin: 0; color: var(--color-fg-muted); max-width: 70ch; }
+  @media (max-width: 520px) { .fq dl.fq-defs { grid-template-columns: 1fr; } }
+</style>
+
+<div class="fq">
+  <header class="fq-head" id="top">
+    <h1 id="title">Family Office Asset Quilt</h1>
+    <p class="fq-take" id="takeaway">In <b data-draw="t-month">—</b>, <b data-draw="t-top">—</b> led the quilt at <span class="fq-num" data-draw="t-topret" data-source="layer2" data-field="ret_inr">—</span> in rupees and <b data-draw="t-bot">—</b> trailed at <span class="fq-num" data-draw="t-botret" data-source="layer2" data-field="ret_inr">—</span>. The rupee <span data-draw="t-fxdir">—</span> <span class="fq-num" data-draw="t-fx" data-source="layer1" data-field="chg_1">—</span> against the dollar that month, which <span data-draw="t-fxeff">—</span> the rupee return of every dollar asset.</p>
+    <p class="fq-muted">Monthly total returns, INR base. Global assets are converted at the Fed's USD/INR rate. Rankings are diagnostics for the investment committee, not trade instructions.</p>
+  </header>
+
+  <section class="fq-section" id="macro">
+    <div class="fq-sechead">
+      <h2>Macro and liquidity backdrop</h2>
+      <span class="fq-muted">Latest reading, with 1-month and 3-month change</span>
+    </div>
+    <div class="fq-macro">
+      <div class="fq-group" id="macro-liquidity"><h3>Liquidity</h3><div class="fq-cards dash-skeleton" data-draw="macro" data-group="Liquidity" data-source="layer1"></div></div>
+      <div class="fq-group" id="macro-rates"><h3>Rates and credit</h3><div class="fq-cards dash-skeleton" data-draw="macro" data-group="Rates" data-source="layer1"></div></div>
+      <div class="fq-group" id="macro-fx"><h3>FX and volatility</h3><div class="fq-cards dash-skeleton" data-draw="macro" data-group="FX &amp; volatility" data-source="layer1"></div></div>
+      <div class="fq-group" id="macro-ratios"><h3>Regime ratios</h3><div class="fq-cards dash-skeleton" data-draw="macro" data-group="Regime ratios" data-source="layer1"></div></div>
+    </div>
+  </section>
+
+  <section class="fq-section" id="quilt">
+    <div class="fq-sechead">
+      <h2>Asset class quilt</h2>
+      <span class="fq-muted">Ranked best to worst each month. Point at a tile to follow that asset across months.</span>
+    </div>
+    <div class="fq-tools">
+      <label class="fq-muted" for="fq-ccy">Returns in</label>
+      <select class="dash-select" id="fq-ccy" aria-label="Currency of returns">
+        <option value="inr">Rupees (INR)</option>
+        <option value="local">Local currency</option>
+      </select>
+      <div class="fq-legend" data-draw="legend" aria-label="Asset families"></div>
+    </div>
+    <div class="fq-wrap">
+      <div class="fq-scroll">
+        <div class="fq-quilt dash-skeleton" id="quilt-grid" data-draw="quilt" data-set="layer2" data-source="layer2" role="img" aria-label="Asset class returns ranked by month"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fq-section" id="detail">
+    <div class="fq-sechead">
+      <h2>Latest completed month: <span data-draw="d-month">—</span></h2>
+      <span class="fq-muted">Sorted by the currency chosen above</span>
+    </div>
+    <div class="fq-tablewrap">
+      <table class="fq-table" data-source="layer2" data-row-key="key" aria-label="Asset class detail">
+        <thead>
+          <tr>
+            <th data-field="name">Asset</th>
+            <th data-field="ret_inr">1M INR</th>
+            <th data-field="ret_local">1M local</th>
+            <th data-field="rank">Rank</th>
+            <th data-field="ret_3m">3M INR</th>
+            <th data-field="rank_3m">3M rank</th>
+            <th data-field="rank_change">Rank change</th>
+            <th data-field="vol">Volatility</th>
+            <th data-field="stretch">Trend stretch</th>
+            <th data-field="flags">Flags</th>
+          </tr>
+        </thead>
+        <tbody data-draw="detail"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="fq-section" id="sectors">
+    <div class="fq-sechead">
+      <h2>Sector rotation</h2>
+      <span class="fq-muted">Last six months. India in rupees, US in dollars.</span>
+    </div>
+    <div class="fq-sectors">
+      <div id="sectors-india">
+        <h3>India: 10 NSE sectors (total return)</h3>
+        <div class="fq-wrap"><div class="fq-scroll"><div class="fq-quilt fq-small dash-skeleton" data-draw="quilt" data-set="layer3_in" data-source="layer3_in" role="img" aria-label="Indian sector returns ranked by month"></div></div></div>
+      </div>
+      <div id="sectors-us">
+        <h3>US: 11 sectors plus semiconductors</h3>
+        <div class="fq-wrap"><div class="fq-scroll"><div class="fq-quilt fq-small dash-skeleton" data-draw="quilt" data-set="layer3_us" data-source="layer3_us" role="img" aria-label="US sector returns ranked by month"></div></div></div>
+      </div>
+    </div>
+    <p class="fq-muted" id="spread">Semiconductors (SMH, converted to rupees) minus Nifty IT in <span data-draw="d-month">—</span>: <span class="fq-num" data-draw="spread" data-source="layer3_us" data-field="smh_inr_minus_nifty_it">—</span>. A wide gap means global AI hardware and Indian IT services are moving apart.</p>
+  </section>
+
+  <section class="fq-section" id="catalysts">
+    <div class="fq-sechead">
+      <h2>Forward catalysts</h2>
+      <span class="fq-muted">Prediction-market odds today, change over 30 days, and Kalshi where it lists the same event</span>
+    </div>
+    <div class="fq-cats dash-skeleton" data-draw="cats" data-source="catalysts"></div>
+    <p class="fq-muted">Thin means the event holds less money than the threshold set for it, so one trader can move the price. Major repricing means a move of 20 points or more in 30 days.</p>
+  </section>
+
+  <details id="quality">
+    <summary>Data checks behind these numbers</summary>
+    <div class="fq-tablewrap" style="margin-top: var(--cds-gap-md)">
+      <table class="fq-table" data-source="quality" data-row-key="check" aria-label="Data checks">
+        <thead><tr><th data-field="check">Check</th><th data-field="status">Result</th><th data-field="detail">Detail</th></tr></thead>
+        <tbody data-draw="quality"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <details id="definitions">
+    <summary>How the numbers are worked out</summary>
+    <dl class="fq-defs">
+      <dt>Total return</dt><dd>Price change plus dividends or coupons. Indian indices are the official total-return series from NSE Indices; US and global assets use dividend-adjusted ETF prices.</dd>
+      <dt>Rupee return</dt><dd>(1 + local return) × (1 + change in USD/INR) − 1. When the rupee weakens, dollar assets earn more in rupees.</dd>
+      <dt>3M return and rank</dt><dd>Return compounded over the last three months, ranked the same way. An asset near the top on both 1M and 3M is a persistent leader; near the bottom on both, a persistent laggard.</dd>
+      <dt>Rank change</dt><dd>Last month's rank minus this month's. Positive means the asset moved up.</dd>
+      <dt>Volatility</dt><dd>Annualised standard deviation of daily returns over the past year.</dd>
+      <dt>Trend stretch</dt><dd>How far price sits from its 200-day average, measured in units of its own volatility. Beyond ±2 is flagged as stretched. Not shown for cash, which rises every day.</dd>
+      <dt>Gold</dt><dd>International gold converted to rupees, so it ranks on the same basis as other global assets. Indian gold can differ by several points in a month because of import duty and the local premium.</dd>
+      <dt>Current month</dt><dd>The last column is month to date and its tiles have a dashed outline. Rankings there will change.</dd>
+    </dl>
+  </details>
+</div>
+
+<script>
+(function () {
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const FAMILIES = ['Indian equity', 'Global equity', 'Bonds & cash', 'Real assets', 'Crypto'];
+  const FQ = window.FQ = {
+    ccy: 'inr',
+    monthLabel(m) { const [y, mo] = m.split('-'); return MON[+mo - 1] + ' ’' + y.slice(2); },
+    monthLong(m) { const [y, mo] = m.split('-'); return ['January','February','March','April','May','June','July','August','September','October','November','December'][+mo - 1] + ' ' + y; },
+    pct(v, d = 1) { if (v == null || isNaN(v)) return '—'; const s = (v * 100).toFixed(d); return (v > 0 ? '+' : v < 0 ? '−' : '') + s.replace('-', '') + '%'; },
+    num(v, d = 2) { return (v == null || isNaN(v)) ? '—' : (+v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); },
+    signed(v, d = 2) { if (v == null || isNaN(v)) return '—'; return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d); },
+    color(fam) { const i = FAMILIES.indexOf(fam); return dash.colors[(i < 0 ? 0 : i) % dash.colors.length]; },
+    families: FAMILIES,
+    rows(id) { const d = dash.data(id); return { status: d.status, rows: d.status === 'ok' && Array.isArray(d.data) ? d.data : [] }; },
+    done(el) { el.classList.remove('dash-skeleton'); },
+    failed(el, what) { FQ.done(el); el.replaceChildren(); const p = document.createElement('p'); p.className = 'fq-muted'; p.textContent = 'Could not load ' + what + '. Open Sources to see why.'; el.append(p); },
+    latestDone(rows) { const ms = rows.filter(r => !r.mtd).map(r => r.m); return ms.sort().at(-1); },
+    pills(parent, flags) {
+      (flags || '').split(';').map(s => s.trim()).filter(Boolean).forEach(f => {
+        const s = document.createElement('span');
+        s.className = 'fq-pill' + (/LEADER|REPRICING/.test(f) ? ' fq-up' : /LAGGARD/.test(f) ? ' fq-down' : /STRETCHED|THIN|WIDE|DISAGREE/.test(f) ? ' fq-warn' : '');
+        s.textContent = f.charAt(0) + f.slice(1).toLowerCase();
+        parent.append(s);
+      });
+    },
+  };
+
+  // Currency switch: the control is static; it only changes state and redraws.
+  document.querySelectorAll('#fq-ccy').forEach(sel => {
+    sel.value = FQ.ccy;
+    sel.addEventListener('change', () => { FQ.ccy = sel.value; dash.draw('quilt'); dash.draw('detail'); });
+  });
+
+  // ── Takeaway sentence ────────────────────────────────────────────────────
+  function takeaway() {
+    const q = FQ.rows('layer2');
+    if (q.status !== 'ok' || !q.rows.length) return null;
+    const m = FQ.latestDone(q.rows);
+    const cur = q.rows.filter(r => r.m === m).sort((a, b) => a.rank - b.rank);
+    const l1 = FQ.rows('layer1');
+    const fx = l1.rows.find(r => r.key === m + '|USDINR');
+    return { m, top: cur[0], bot: cur.at(-1), fx };
+  }
+  const tk = (fn) => (el) => { const t = takeaway(); el.textContent = t ? fn(t, el) : '—'; };
+  dash.draw('t-month', tk(t => FQ.monthLong(t.m)));
+  dash.draw('t-top', tk(t => t.top.name));
+  dash.draw('t-bot', tk(t => t.bot.name));
+  dash.draw('t-topret', tk((t, el) => { el.dataset.where = 'key=' + t.top.key; return FQ.pct(t.top.ret_inr); }));
+  dash.draw('t-botret', tk((t, el) => { el.dataset.where = 'key=' + t.bot.key; return FQ.pct(t.bot.ret_inr); }));
+  dash.draw('t-fxdir', tk(t => !t.fx ? '—' : t.fx.chg_1 > 0 ? 'weakened' : 'strengthened'));
+  dash.draw('t-fx', tk((t, el) => { if (!t.fx) return '—'; el.dataset.where = 'key=' + t.fx.key; return (Math.abs(t.fx.chg_1) * 100).toFixed(1) + '%'; }));
+  dash.draw('t-fxeff', tk(t => !t.fx ? '—' : t.fx.chg_1 > 0 ? 'added to' : 'reduced'));
+  dash.draw('d-month', (el) => { const q = FQ.rows('layer2'); el.textContent = q.rows.length ? FQ.monthLong(FQ.latestDone(q.rows)) : '—'; });
+
+  // ── Legend ───────────────────────────────────────────────────────────────
+  dash.draw('legend', (el) => {
+    el.replaceChildren(...FAMILIES.map(f => {
+      const s = document.createElement('span'); const i = document.createElement('i');
+      i.style.background = FQ.color(f); s.append(i, document.createTextNode(f)); return s;
+    }));
+  });
+
+  // ── Layer 1 cards ────────────────────────────────────────────────────────
+  function fmtValue(r) {
+    const v = +r.value;
+    switch (r.units) {
+      case 'USD bn': return '$' + Math.round(v).toLocaleString('en-US') + 'bn';
+      case 'USD tn': return '$' + v.toFixed(2) + 'tn';
+      case 'INR cr': return '₹' + Math.round(v).toLocaleString('en-IN') + ' cr';
+      case '%': return v.toFixed(2) + '%';
+      case 'pp': return FQ.signed(v) + 'pp';
+      case 'INR': return '₹' + v.toFixed(2);
+      case 'index': return v.toFixed(1);
+      default: return v.toFixed(3);
+    }
+  }
+  function fmtChange(r, which) {
+    const v = which === 1 ? r.chg_1 : r.chg_3;
+    if (r.change_type === 'pct' || r.change_type === 'yoy') return FQ.pct(v);
+    if (r.change_type === 'diff') return FQ.signed(v) + (r.units === '%' || r.units === 'pp' ? 'pp' : '');
+    return '';
+  }
+  dash.draw('macro', (el) => {
+    const d = FQ.rows('layer1');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the macro indicators');
+    FQ.done(el);
+    const group = el.dataset.group;
+    const latest = new Map();
+    d.rows.filter(r => r.group === group).forEach(r => {
+      const k = r.key.split('|')[1];
+      if (!latest.has(k) || r.m > latest.get(k).m) latest.set(k, r);
+    });
+    el.replaceChildren(...[...latest.values()].map(r => {
+      const row = document.createElement('div'); row.className = 'fq-ind'; row.id = 'ind-' + r.key.split('|')[1];
+      const lab = document.createElement('div'); lab.className = 'fq-ind-label'; lab.textContent = r.label;
+      const val = document.createElement('div'); val.className = 'fq-ind-val';
+      val.dataset.source = 'layer1'; val.dataset.field = 'value'; val.dataset.where = 'key=' + r.key;
+      val.textContent = fmtValue(r);
+      const chg = document.createElement('div'); chg.className = 'fq-ind-chg';
+      const asof = ' · as of ' + r.obs_date;
+      if (r.change_type === 'level') {
+        chg.textContent = (r.note ? r.note : '') + asof;
+      } else {
+        const l1 = r.change_type === 'yoy' ? 'YoY ' : '1M ', l3 = r.change_type === 'yoy' ? '3M annualised ' : '3M ';
+        const a = document.createElement('span'); a.dataset.source = 'layer1'; a.dataset.field = 'chg_1'; a.dataset.where = 'key=' + r.key; a.textContent = fmtChange(r, 1);
+        const b = document.createElement('span'); b.dataset.source = 'layer1'; b.dataset.field = 'chg_3'; b.dataset.where = 'key=' + r.key; b.textContent = fmtChange(r, 3);
+        chg.append(l1, a, ' · ' + l3, b, asof);
+        if (r.note) chg.append(document.createElement('br'), r.note);
+      }
+      row.append(lab, val, chg);
+      return row;
+    }));
+  });
+
+  // ── Quilt (assets and sectors) ───────────────────────────────────────────
+  dash.draw('quilt', (el) => {
+    const set = el.dataset.set;
+    const d = FQ.rows(set);
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the quilt');
+    FQ.done(el);
+    const isAsset = set === 'layer2';
+    const local = isAsset && FQ.ccy === 'local';
+    const field = isAsset ? (local ? 'ret_local' : 'ret_inr') : 'ret_local';
+    const rankField = isAsset ? (local ? 'rank_local' : 'rank') : 'rank';
+    let months = [...new Set(d.rows.map(r => r.m))].sort();
+    if (!isAsset) months = months.slice(-6);
+    const n = Math.max(...months.map(m => d.rows.filter(r => r.m === m).length));
+    const cellW = isAsset ? 92 : 86;
+    el.style.gridTemplateColumns = `24px repeat(${months.length}, minmax(${cellW}px, 1fr))`;
+    const frag = [];
+    frag.push(Object.assign(document.createElement('div'), { className: 'fq-colhead' }));
+    months.forEach(m => {
+      const h = document.createElement('div');
+      const mtd = d.rows.some(r => r.m === m && r.mtd);
+      h.className = 'fq-colhead' + (mtd ? ' fq-mtd' : '');
+      h.textContent = FQ.monthLabel(m) + (mtd ? ' MTD' : '');
+      frag.push(h);
+    });
+    const byMonth = new Map(months.map(m => [m, d.rows.filter(r => r.m === m).sort((a, b) => a[rankField] - b[rankField] || b[field] - a[field])]));
+    const sectorColor = isAsset ? null : dash.colors[set === 'layer3_in' ? 0 : 1];
+    for (let i = 0; i < n; i++) {
+      const rc = document.createElement('div'); rc.className = 'fq-rankcell'; rc.textContent = i + 1; frag.push(rc);
+      months.forEach(m => {
+        const r = byMonth.get(m)[i];
+        const c = document.createElement('div');
+        if (!r) { frag.push(c); return; }
+        const col = isAsset ? FQ.color(r.family) : sectorColor;
+        c.className = 'fq-cell' + (r.mtd ? ' fq-mtdcell' : '');
+        c.style.background = `color-mix(in srgb, ${col} ${isAsset ? 20 : 12}%, var(--color-panel))`;
+        c.style.borderLeftColor = col;
+        c.dataset.id = r.id; c.dataset.key = r.key;
+        c.dataset.source = set; c.dataset.field = field; c.dataset.where = 'key=' + r.key;
+        const b = document.createElement('b'); b.textContent = r.short || r.name;
+        const s = document.createElement('span'); s.textContent = FQ.pct(r[field]);
+        if (r[field] < 0) s.className = 'fq-neg';
+        c.append(b, s);
+        frag.push(c);
+      });
+    }
+    el.replaceChildren(...frag);
+
+    // Tooltip and highlight live inside this drawing.
+    const wrap = el.closest('.fq-wrap');
+    let tip = wrap.querySelector('.fq-tip');
+    if (!tip) { tip = document.createElement('div'); tip.className = 'fq-tip'; tip.hidden = true; wrap.append(tip); }
+    const byKey = new Map(d.rows.map(r => [r.key, r]));
+    let pinned = null;
+    const highlight = (id) => {
+      el.classList.toggle('fq-dim', !!id);
+      el.querySelectorAll('.fq-cell').forEach(c => c.classList.toggle('fq-hl', !!id && c.dataset.id === id));
+    };
+    const show = (c) => {
+      const r = byKey.get(c.dataset.key); if (!r) return;
+      tip.replaceChildren();
+      const h = document.createElement('strong'); h.textContent = r.name + ' · ' + FQ.monthLabel(r.m) + (r.mtd ? ' (MTD)' : '');
+      const dl = document.createElement('dl');
+      const add = (k, v) => { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; dl.append(dt, dd); };
+      if (isAsset) { add('1M in INR', FQ.pct(r.ret_inr)); add('1M in ' + r.ccy, FQ.pct(r.ret_local)); }
+      else { add('1M (' + r.ccy + ')', FQ.pct(r.ret_local)); if (r.ccy === 'USD' && r.ret_inr != null) add('1M in INR', FQ.pct(r.ret_inr)); }
+      add('Rank', r[rankField] + ' of ' + byMonth.get(r.m).length);
+      add('3M return', FQ.pct(r.ret_3m)); add('3M rank', r.rank_3m ?? '—');
+      add('Volatility', r.vol == null ? '—' : (r.vol * 100).toFixed(0) + '%');
+      add('Trend stretch', r.stretch == null ? '—' : FQ.signed(r.stretch, 1));
+      tip.append(h, dl);
+      if (r.flags) { const f = document.createElement('div'); f.style.marginTop = '6px'; FQ.pills(f, r.flags); tip.append(f); }
+      tip.hidden = false;
+      const wr = wrap.getBoundingClientRect(), cr = c.getBoundingClientRect();
+      let x = cr.right - wr.left + 6, y = cr.top - wr.top;
+      if (x + 270 > wr.width) x = Math.max(0, cr.left - wr.left - 266);
+      tip.style.left = x + 'px'; tip.style.top = Math.max(0, y) + 'px';
+    };
+    el.onmouseover = (e) => { const c = e.target.closest('.fq-cell'); if (!c) return; if (!pinned) highlight(c.dataset.id); show(c); };
+    el.onmouseleave = () => { tip.hidden = true; if (!pinned) highlight(null); };
+    el.onclick = (e) => {
+      const c = e.target.closest('.fq-cell');
+      if (!c) return;
+      pinned = pinned === c.dataset.id ? null : c.dataset.id;
+      highlight(pinned || c.dataset.id); show(c);
+    };
+  });
+
+  // ── Detail table ─────────────────────────────────────────────────────────
+  dash.draw('detail', (tb) => {
+    const d = FQ.rows('layer2');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    const m = FQ.latestDone(d.rows);
+    const local = FQ.ccy === 'local';
+    const rows = d.rows.filter(r => r.m === m).sort((a, b) => (local ? a.rank_local - b.rank_local : a.rank - b.rank));
+    tb.replaceChildren(...rows.map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const ret = (v) => td(FQ.pct(v), 'fq-num' + (v < 0 ? ' fq-neg' : ''));
+      const flags = document.createElement('td'); flags.className = 'fq-l'; FQ.pills(flags, r.flags);
+      tr.append(
+        td(r.name),
+        ret(r.ret_inr), ret(r.ret_local),
+        td(local ? r.rank_local : r.rank, 'fq-num'),
+        ret(r.ret_3m), td(r.rank_3m ?? '—', 'fq-num'),
+        td(r.rank_change == null ? '—' : FQ.signed(r.rank_change, 0), 'fq-num'),
+        td(r.vol == null ? '—' : (r.vol * 100).toFixed(0) + '%', 'fq-num'),
+        td(r.stretch == null ? '—' : FQ.signed(r.stretch, 1), 'fq-num'),
+        flags);
+      return tr;
+    }));
+  });
+
+  // ── Cross-market spread ──────────────────────────────────────────────────
+  dash.draw('spread', (el) => {
+    const d = FQ.rows('layer3_us');
+    if (d.status !== 'ok') { el.textContent = '—'; return; }
+    const m = FQ.latestDone(d.rows);
+    const r = d.rows.find(x => x.m === m && x.id === 'US_SMH');
+    if (!r || r.smh_inr_minus_nifty_it == null) { el.textContent = '—'; return; }
+    el.dataset.where = 'key=' + r.key;
+    el.textContent = FQ.signed(r.smh_inr_minus_nifty_it * 100, 1) + ' points';
+  });
+
+  // ── Catalysts ────────────────────────────────────────────────────────────
+  dash.draw('cats', (el) => {
+    const d = FQ.rows('catalysts');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the catalysts');
+    FQ.done(el);
+    const groups = new Map();
+    d.rows.forEach(r => { if (!groups.has(r.label)) groups.set(r.label, []); groups.get(r.label).push(r); });
+    el.replaceChildren(...[...groups].map(([label, rows]) => {
+      const card = document.createElement('div'); card.className = 'fq-cat'; card.id = 'cat-' + rows[0].key.split('|')[0];
+      const h = document.createElement('div'); h.className = 'fq-cat-h';
+      const t = document.createElement('strong'); t.textContent = label;
+      const liq = document.createElement('span'); liq.className = 'fq-muted';
+      liq.textContent = '$' + d3.format('.2~s')(rows[0].event_liquidity).replace('G', 'B') + ' liquidity · ends ' + rows[0].event_end;
+      h.append(t, liq);
+      const head = document.createElement('div'); head.className = 'fq-out fq-muted';
+      head.append(Object.assign(document.createElement('span'), { textContent: 'Outcome' }),
+                  Object.assign(document.createElement('span'), { className: 'fq-num', textContent: 'Odds' }),
+                  Object.assign(document.createElement('span'), { className: 'fq-num', textContent: '30-day' }));
+      card.append(h, head);
+      rows.sort((a, b) => b.prob - a.prob).forEach(r => {
+        const o = document.createElement('div'); o.className = 'fq-out';
+        const name = document.createElement('span'); name.textContent = r.outcome;
+        if (r.kalshi_prob != null) { const k = document.createElement('span'); k.className = 'fq-muted'; k.dataset.source = 'catalysts'; k.dataset.field = 'kalshi_prob'; k.dataset.where = 'key=' + r.key; k.textContent = ' · Kalshi ' + (r.kalshi_prob * 100).toFixed(1) + '%'; name.append(k); }
+        const p = document.createElement('span'); p.className = 'fq-num'; p.dataset.source = 'catalysts'; p.dataset.field = 'prob'; p.dataset.where = 'key=' + r.key;
+        p.textContent = (r.prob * 100).toFixed(1) + '%';
+        const dl = document.createElement('span'); dl.className = 'fq-num'; dl.dataset.source = 'catalysts'; dl.dataset.field = 'delta_30d'; dl.dataset.where = 'key=' + r.key;
+        dl.textContent = r.delta_30d == null ? '—' : FQ.signed(r.delta_30d * 100, 1) + 'pt';
+        const bar = document.createElement('div'); bar.className = 'fq-bar';
+        const i = document.createElement('i'); i.style.width = Math.max(1, r.prob * 100) + '%'; i.style.background = dash.colors[0]; bar.append(i);
+        o.append(name, p, dl, bar);
+        if (r.flags) { const f = document.createElement('div'); f.style.gridColumn = '1 / -1'; FQ.pills(f, r.flags); o.append(f); }
+        card.append(o);
+      });
+      return card;
+    }));
+  });
+
+  // ── Data checks ──────────────────────────────────────────────────────────
+  dash.draw('quality', (tb) => {
+    const d = FQ.rows('quality');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    tb.replaceChildren(...d.rows.map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.check;
+      const a = document.createElement('td'); a.className = 'fq-l'; a.textContent = r.check;
+      const b = document.createElement('td'); const pill = document.createElement('span');
+      pill.className = 'fq-pill' + (r.status === 'PASS' ? ' fq-up' : r.status === 'FAIL' ? ' fq-down' : r.status === 'WARN' ? ' fq-warn' : '');
+      pill.textContent = r.status === 'PASS' ? 'Pass' : r.status === 'FAIL' ? 'Fail' : r.status === 'WARN' ? 'Warning' : 'Note';
+      b.append(pill);
+      const c = document.createElement('td'); c.className = 'fq-l'; c.textContent = r.detail;
+      tr.append(a, b, c);
+      return tr;
+    }));
+  });
+})();
+</script>
+
+<footer class="site-foot">
+  <p>Data as of 2026-11-27. Sources: NSE Indices (niftyindices.com), Yahoo Finance, FRED (Federal Reserve Bank of St. Louis), ECB Data Portal, Bank of Japan, People's Bank of China, Reserve Bank of India, Polymarket and Kalshi.</p>
+  <p>For information and discussion only. Nothing here is investment advice or a recommendation to buy or sell any security.</p>
+</footer>
+</main>
+</body>
+</html>

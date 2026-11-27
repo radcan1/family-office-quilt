@@ -1,0 +1,16 @@
+# Regenerated on every run (run.py → quilt.py → export.py)
+data/daily/
+data/quilt/
+data/export/
+data/month_end_panel.csv
+
+# Kept on purpose:
+#   data/raw/              provider caches; RBI liquidity history only exists here
+#   data/catalysts_*.csv   month-end prediction-market snapshots (cannot be refetched later)
+#   data/catalysts_raw_*   raw Polymarket payloads behind each snapshot
+#   data/quality_report_*  the data checks for each run
+
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
