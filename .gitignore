@@ -24,3 +24,9 @@ private/
 
 # NSE F&O daily files are large (about 1MB each); data/positioning/ keeps the derived history
 data/raw/positioning/fo_*.zip
+
+# Backtest: Yahoo histories are refetched on each run; NSE and NSDL caches are kept
+# (fetched slowly, one request at a time)
+data/backtest/raw/*.csv
+!data/backtest/raw/nifty_tri_*.csv
+!data/backtest/raw/fpi_eq.csv

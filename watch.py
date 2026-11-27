@@ -53,6 +53,10 @@ def latest(source):
         j = pd.concat([inr_ret(a), inr_ret(b)], axis=1, join="inner").dropna()
         r = j.iloc[-1] / j.iloc[-1 - int(n)] - 1
         return float((r.iloc[0] - r.iloc[1]) * 100), str(j.index[-1].date())
+    if kind == "val":
+        # Where the market's latest P/E sits in its own history (percentile):  val:<valuation id>
+        v = pd.read_csv(os.path.join(D, "valuation", "valuation.csv")).set_index("id").loc[key]
+        return float(v.pctl_now), str(v.pe_now_date)[:10]
     if kind == "implied":
         im = pd.read_csv(os.path.join(D, "positioning", "implied.csv"), parse_dates=["as_of", "expiry"])
         x = im[im.underlying == key]

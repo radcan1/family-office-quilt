@@ -43,6 +43,11 @@
       "area": "Global markets, China and the yen",
       "data": "India was the best of 12 world equity markets in rupees in October (+2.0%), while China markets averaged −9.7% and Asian tech fell hardest (Korea −17.1%, Taiwan −11.3%). Yields fell in five of six major bond markets but rose in India, leaving India's 10-year 2.25pp above the US. Japan's 10-year yield is up 1.15pp over 12 months.",
       "why": "China and India compete for the same emerging-market money, so a strong China rally is a risk to foreign flows into India; October's selling was not that. A sudden yen surge has in the past forced selling across global markets, India included. The India–US yield gap is roughly what foreign bond investors earn for holding rupees, and roughly the cost of hedging dollars back to rupees."
+    },
+    {
+      "area": "Valuations",
+      "data": "Against their own history, US large caps (S&P 500 P/E 23.6, 85th percentile), Germany, the UK and Taiwan are expensive, Korea and Hong Kong are cheap, and India's Nifty 50 is average (19.3, 49th percentile). In our backtest, starting valuation did not reliably predict the next year's return for the S&P 500 or the Nifty 50, there are too few independent periods to judge five-year returns, and the cheapest third of world markets did no better than the most expensive third (+9.1% against +10.6% over the next 12 months, since 2000).",
+      "why": "Valuation is most useful for setting return expectations and leaning long-term weights, not for timing. Expensive markets can stay expensive for years, but they leave less room for disappointment. In the same backtest, asset classes with the strongest 3-month returns beat the weakest the following month in 57% of months, which supports watching the quilt's leaders and laggards."
     }
   ],
   "actions": [
@@ -80,6 +85,11 @@
       "title": "Watch for a China rotation and yen stress",
       "consider": "Keep the China-versus-India gap and the yen on the watchlist. If China starts to beat India by a wide margin, or the yen surges, foreign selling of Indian large caps tends to follow; consider agreeing in advance how the committee would respond rather than deciding in the moment.",
       "revisit": "If China large caps beat the Nifty 50 by 10pp over 3 months, the yen gains 4% in a month, or Japan's 10-year yield passes 3%."
+    },
+    {
+      "title": "Keep valuation in the long-term discussion, not the timing",
+      "consider": "When reviewing long-term weights, consider noting where each region sits against its own valuation history, and whether planned additions to US large caps should be paced given the 85th-percentile reading. The backtest gives no reason to switch between markets on valuation alone.",
+      "revisit": "If the S&P 500 P/E passes the 90th percentile of its history, or the Nifty 50 moves above the 80th or below the 20th."
     },
     {
       "title": "Plan around the 4–9 December decisions",

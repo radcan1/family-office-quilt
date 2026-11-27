@@ -42,6 +42,19 @@
       "detail": ""
     },
     {
+      "id": "spx_val",
+      "name": "S&P 500 P/E, percentile of its own history",
+      "why": "US large caps are the biggest single exposure in most global portfolios; a very high starting valuation has meant lower returns over the following years.",
+      "if_triggered": "Above 90: US large caps are near their most expensive in 20 years; check how much of the global allocation they make up across all funds.",
+      "status": "Near",
+      "value": 85.0,
+      "value_text": "85",
+      "as_of": "2026-11-27",
+      "level_text": "above 90",
+      "crossed": "",
+      "detail": ""
+    },
+    {
       "id": "fed",
       "name": "Fed decision, 9 December",
       "why": "A hike lifts the dollar and US yields and pulls money from emerging markets including India.",
@@ -188,6 +201,19 @@
       "value_text": "+2.47pp",
       "as_of": "2026-11-24",
       "level_text": "below +2.00pp",
+      "crossed": "",
+      "detail": ""
+    },
+    {
+      "id": "nifty_val",
+      "name": "Nifty 50 P/E, percentile of its own history",
+      "why": "Valuation says little about the next few months but more about the next five years: Indian large caps bought when expensive against their own history have tended to return less afterwards.",
+      "if_triggered": "Above 80: Indian large caps are expensive against their history; a reason to stick to policy weights rather than add. Below 20: cheap against history; a reason to consider topping up towards policy weights.",
+      "status": "Calm",
+      "value": 60.416666666666664,
+      "value_text": "60",
+      "as_of": "2026-11-27",
+      "level_text": "above 80; below 20",
       "crossed": "",
       "detail": ""
     }

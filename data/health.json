@@ -1,9 +1,9 @@
 {
-  "run_at": "2026-11-27T12:55:10",
+  "run_at": "2026-11-27T22:52:47",
   "as_of": "2026-11-27",
   "summary": {
-    "PASS": 34,
-    "WARN": 2,
+    "PASS": 44,
+    "WARN": 3,
     "FAIL": 0
   },
   "checks": [
@@ -99,6 +99,69 @@
       "as_of": null
     },
     {
+      "area": "Valuations",
+      "check": "Valuations refreshed",
+      "status": "PASS",
+      "detail": "valuation.py last run 0 days ago (limit 7)",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "every P/E and P/B in a sane range and current",
+      "status": "PASS",
+      "detail": "23 markets with a October 2026 P/E (3\u2013100) and P/B (0.3\u201320)",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "worldperatio vs Yahoo fund P/E today",
+      "status": "PASS",
+      "detail": "Gaps: SPY +2%, QQQ +4%, FXI -6%, EWH -4%, EWJ +5%, EWY +10%, EWT +12%, EWG +0%, EWU +1%, EEM +2%",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "S&P 500 P/E history vs Shiller's S&P 500 P/E",
+      "status": "PASS",
+      "detail": "354 months from Jan 1995 to Jun 2024: rank correlation 0.69 (limit 0.6); the fund-based P/E is typically 0.77\u00d7 Shiller's, which uses reported (GAAP) earnings. Shiller's file stopped updating in Sept 2024",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "Nifty 50 P/E (NSE) moves with the MSCI India fund P/E",
+      "status": "PASS",
+      "detail": "correlation 0.80 over 263 months since Jan 2005; latest Nifty 50 20.9, INDA 22.0",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "Nifty 50 P/E and P/B readings compared",
+      "status": "PASS",
+      "detail": "P/E 49th percentile of its history, P/B 6th: 43 points apart, so the read reports both",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "month's P/E changes match price moves",
+      "status": "WARN",
+      "detail": "P/E moved more than 15% with a price move under 5%, likely an earnings-data update rather than a market move: Japan P/E -23%, price -4.7%",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "Backtest results",
+      "status": "PASS",
+      "detail": "backtest.py last run 2026-11-27 (0 days ago; rerun monthly); 21 signals tested",
+      "as_of": null
+    },
+    {
+      "area": "Valuations",
+      "check": "Backtest rebuilds the same regime as the monthly facts",
+      "status": "PASS",
+      "detail": "2 of 2 months match",
+      "as_of": null
+    },
+    {
       "area": "Positioning",
       "check": "15 of 15 gauges fresh and in range",
       "status": "PASS",
@@ -158,14 +221,14 @@
       "area": "Memo",
       "check": "Monthly read: every number traces to the evidence",
       "status": "PASS",
-      "detail": "93 distinct numbers checked",
+      "detail": "115 distinct numbers checked",
       "as_of": null
     },
     {
       "area": "Memo",
       "check": "What this means for us: every number traces to the evidence",
       "status": "PASS",
-      "detail": "52 distinct numbers checked",
+      "detail": "64 distinct numbers checked",
       "as_of": null
     },
     {
@@ -193,7 +256,7 @@
       "area": "Page data",
       "check": "read.json",
       "status": "PASS",
-      "detail": "33 rows",
+      "detail": "36 rows",
       "as_of": null
     },
     {
@@ -243,6 +306,20 @@
       "check": "layer1.json",
       "status": "PASS",
       "detail": "456 rows",
+      "as_of": null
+    },
+    {
+      "area": "Page data",
+      "check": "valuation.json",
+      "status": "PASS",
+      "detail": "26 rows",
+      "as_of": null
+    },
+    {
+      "area": "Page data",
+      "check": "backtest.json",
+      "status": "PASS",
+      "detail": "43 rows",
       "as_of": null
     },
     {

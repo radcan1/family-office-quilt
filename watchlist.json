@@ -137,6 +137,29 @@
       "if_triggered": "Below 2pp: Indian bonds are less attractive to foreign investors, which can weigh on the rupee; hedging dollar holdings gets cheaper."
     },
     {
+      "id": "nifty_val",
+      "name": "Nifty 50 P/E, percentile of its own history",
+      "source": "val:IN_LARGE",
+      "unit": "",
+      "decimals": 0,
+      "above": 80.0,
+      "below": 20.0,
+      "near_pct": 12,
+      "why": "Valuation says little about the next few months but more about the next five years: Indian large caps bought when expensive against their own history have tended to return less afterwards.",
+      "if_triggered": "Above 80: Indian large caps are expensive against their history; a reason to stick to policy weights rather than add. Below 20: cheap against history; a reason to consider topping up towards policy weights."
+    },
+    {
+      "id": "spx_val",
+      "name": "S&P 500 P/E, percentile of its own history",
+      "source": "val:US_LARGE",
+      "unit": "",
+      "decimals": 0,
+      "above": 90.0,
+      "near_pct": 8,
+      "why": "US large caps are the biggest single exposure in most global portfolios; a very high starting valuation has meant lower returns over the following years.",
+      "if_triggered": "Above 90: US large caps are near their most expensive in 20 years; check how much of the global allocation they make up across all funds."
+    },
+    {
       "id": "fed",
       "name": "Fed decision, 9 December",
       "source": "catalyst:FOMC_NEXT",

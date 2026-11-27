@@ -262,3 +262,42 @@ CATALYSTS = [
     dict(key="AI_BUBBLE", label="AI bubble burst", query="ai bubble burst",
          slug_has=["ai-bubble-burst"], pick="largest", min_liq=50_000),
 ]
+
+# ── Valuations (valuation.py) ────────────────────────────────────────────────
+# Trailing P/E for each major equity market, compared with its own history.
+# source: "nse" = NSE Indices daily P/E, P/B, dividend yield (official, from the
+# index owner); "wpr" = worldperatio.com monthly P/E history for the ETF in
+# `etf` (estimated from fund holdings); "yahoo" = Yahoo's current fund P/E only
+# (no history: it builds up from the first run). `etf` is also the Yahoo
+# cross-check. `y10` is the local 10-year yield used for the shares-vs-bonds gap.
+# (id, name, group, source, source_id, etf, y10)
+VALUATION = [
+    ("IN_LARGE",    "India: Nifty 50",            "Markets", "nse",   "NIFTY 50",          "INDA", "IN10Y"),
+    ("IN_MID",      "India: Midcap 150",          "Markets", "nse",   "NIFTY MIDCAP 150",  None,   "IN10Y"),
+    ("IN_SMALL",    "India: Smallcap 250",        "Markets", "nse",   "NIFTY SMLCAP 250",  None,   "IN10Y"),
+    ("US_LARGE",    "US: S&P 500",                "Markets", "wpr",   "index/sp-500",      "SPY",  "US10Y"),
+    ("US_TECH",     "US: Nasdaq 100",             "Markets", "wpr",   "index/nasdaq-100",  "QQQ",  "US10Y"),
+    ("GL_CN_LARGE", "China large caps",           "Markets", "wpr",   "area/china",        "FXI",  "CN10Y"),
+    ("GL_CN_TECH",  "China tech",                 "Markets", "yahoo", "CQQQ",              "CQQQ", "CN10Y"),
+    ("GL_CN_A",     "China A-shares",             "Markets", "yahoo", "ASHR",              "ASHR", "CN10Y"),
+    ("GL_HK",       "Hong Kong",                  "Markets", "wpr",   "area/hong-kong",    "EWH",  "US10Y"),
+    ("GL_JP",       "Japan",                      "Markets", "wpr",   "area/japan",        "EWJ",  "JP10Y"),
+    ("GL_KR",       "Korea",                      "Markets", "wpr",   "area/south-korea",  "EWY",  None),
+    ("GL_TW",       "Taiwan",                     "Markets", "wpr",   "area/taiwan",       "EWT",  None),
+    ("GL_DE",       "Germany",                    "Markets", "wpr",   "area/germany",      "EWG",  "DE10Y"),
+    ("GL_EZ",       "Euro area",                  "Markets", "yahoo", "FEZ",               "FEZ",  "DE10Y"),
+    ("GL_UK",       "UK",                         "Markets", "wpr",   "area/united-kingdom", "EWU", "UK10Y"),
+    ("EM",          "Emerging markets",           "Markets", "wpr",   "area/emerging-markets", "EEM", None),
+    ("IN_BANK",     "Bank",                       "India sectors", "nse", "NIFTY BANK",   None, "IN10Y"),
+    ("IN_FINXB",    "Fin ex-Bank",                "India sectors", "nse", "NIFTY FINSEREXBNK", None, "IN10Y"),
+    ("IN_IT",       "IT",                         "India sectors", "nse", "NIFTY IT",     None, "IN10Y"),
+    ("IN_AUTO",     "Auto",                       "India sectors", "nse", "NIFTY AUTO",   None, "IN10Y"),
+    ("IN_FMCG",     "FMCG",                       "India sectors", "nse", "NIFTY FMCG",   None, "IN10Y"),
+    ("IN_PHARMA",   "Pharma",                     "India sectors", "nse", "NIFTY PHARMA", None, "IN10Y"),
+    ("IN_METAL",    "Metal",                      "India sectors", "nse", "NIFTY METAL",  None, "IN10Y"),
+    ("IN_ENERGY",   "Energy",                     "India sectors", "nse", "NIFTY ENERGY", None, "IN10Y"),
+    ("IN_INFRA",    "Infra",                      "India sectors", "nse", "NIFTY INFRA", None, "IN10Y"),
+    ("IN_REALTY",   "Realty",                     "India sectors", "nse", "NIFTY REALTY", None, "IN10Y"),
+]
+# Context only: the MSCI India fund's P/E, to cross-check the NSE Nifty 50 history.
+VALUATION_XCHECK = [("X_INDA", "India (MSCI India, INDA)", "wpr", "area/india", "INDA")]

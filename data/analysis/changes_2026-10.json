@@ -69,6 +69,11 @@
       "text": "Fed net liquidity turned from rising (+0.1%) to falling (-0.6%)."
     },
     {
+      "importance": 5,
+      "direction": "neutral",
+      "text": "Valuation readings changed: Korea from Average (55th percentile) to Cheap (9th); China large from Cheap (19th percentile) to Below average (23rd); Japan from Expensive (94th percentile) to Average (58th), mostly an earnings-data update."
+    },
+    {
       "importance": 4,
       "direction": "neutral",
       "text": "Cross-asset dispersion rose from 5.4% to 7.1%: winners and losers drifted further apart."

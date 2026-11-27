@@ -5,6 +5,7 @@ checks.py — one health check across every layer, run before publishing.
 Areas:
   1. Market data       every registry series fresh, complete, sane (validate.hygiene)
   2. Accuracy          total-return basis and cross-source agreement (validate.basis_checks)
+  2b. Valuations       ranges, freshness and cross-checks from valuation.py; backtest age and regime match
   3. Positioning       each gauge fresh for its release cycle and inside a sane range
   4. Prediction mkts   today's snapshot, no expired contracts, venues checked
   5. News context      context file matches the memo month, sourcing rules met, calendar not stale
@@ -64,6 +65,33 @@ def market(H, today):
     for c, st, d in validate.basis_checks(store):
         H.add("Accuracy", c, "PASS" if st == "INFO" else st, d)
     return store
+
+
+# ── 2b. Valuations and backtest ─────────────────────────────────────────────
+def valuations(H, today):
+    vd = os.path.join(D, "valuation")
+    f = os.path.join(vd, "checks.json")
+    if not os.path.exists(f):
+        H.add("Valuations", "Valuation files", "FAIL", "data/valuation/checks.json missing: run valuation.py")
+        return
+    age = (dt.date.today() - dt.date.fromtimestamp(os.path.getmtime(f))).days
+    H.add("Valuations", "Valuations refreshed", "PASS" if age <= 7 else "FAIL", f"valuation.py last run {age} days ago (limit 7)")
+    for c in json.load(open(f)):
+        H.add("Valuations", c["check"].replace("Valuations: ", ""), c["status"], c["detail"])
+    b = os.path.join(D, "backtest", "results.json")
+    if os.path.exists(b):
+        B = json.load(open(b))
+        age = (today - dt.date.fromisoformat(B["generated"])).days
+        H.add("Valuations", "Backtest results", "PASS" if age <= 45 else "WARN",
+              f"backtest.py last run {B['generated']} ({age} days ago; rerun monthly); {len(B['summary'])} signals tested")
+        chk = B["regime"].get("matches_analysis", [])
+        if chk:
+            bad = [c for c in chk if c["analysis"] != c["rebuilt"]]
+            H.add("Valuations", "Backtest rebuilds the same regime as the monthly facts", "PASS" if not bad else "WARN",
+                  f"{len(chk) - len(bad)} of {len(chk)} months match"
+                  + ("" if not bad else "; differ: " + ", ".join(f"{c['month']} facts {c['analysis']} ({c['analysis_score']}) vs rebuilt {c['rebuilt']} ({c['rebuilt_score']})" for c in bad)))
+    else:
+        H.add("Valuations", "Backtest results", "WARN", "data/backtest/results.json missing: run backtest.py")
 
 
 # ── 3. Positioning ──────────────────────────────────────────────────────────
@@ -202,7 +230,8 @@ def memo_audit(H, today):
     paths = [os.path.join(D, "analysis", f"facts_{m}.md"), os.path.join(D, "analysis", f"facts_{prev}.md"),
              os.path.join(D, "analysis", f"changes_{m}.json"), os.path.join(D, "analysis", f"watch_{m}.json"),
              os.path.join(HERE, "memos", f"{m}_context.json"), os.path.join(HERE, "watchlist.json"),
-             os.path.join(EXPORT, "context.json"), os.path.join(EXPORT, "quality.json")]
+             os.path.join(EXPORT, "context.json"), os.path.join(EXPORT, "quality.json"),
+             os.path.join(EXPORT, "backtest.json")]
     paths += sorted(glob.glob(os.path.join(D, "analysis", f"watch_{m}_*.json")))     # dated watchlist readings
     evidence = "".join(open(p, encoding="utf-8").read() for p in paths if os.path.exists(p))
     have = _numbers(evidence)
@@ -238,8 +267,9 @@ def memo_audit(H, today):
 def page_data(H):
     expect = {"layer2": len(registry.LAYER2) * 13, "layer3_in": len(registry.LAYER3_INDIA) * 13,
               "layer3_us": len(registry.LAYER3_US) * 13,
-              "layer3_gl": (len(registry.LAYER3_GLOBAL) + len(registry.GLOBAL_REFERENCE)) * 13}
-    for name in ["read", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer3_gl", "layer1", "catalysts", "quality"]:
+              "layer3_gl": (len(registry.LAYER3_GLOBAL) + len(registry.GLOBAL_REFERENCE)) * 13,
+              "valuation": len(registry.VALUATION)}
+    for name in ["read", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer3_gl", "layer1", "valuation", "backtest", "catalysts", "quality"]:
         p = os.path.join(EXPORT, f"{name}.json")
         if not os.path.exists(p):
             H.add("Page data", f"{name}.json", "FAIL", "missing: run export.py")
@@ -261,6 +291,7 @@ def run(today=None):
     today = today or dt.date.today()
     H = Health()
     market(H, today)
+    valuations(H, today)
     positioning(H, today)
     catalysts(H, today)
     memo = memo_audit(H, today)

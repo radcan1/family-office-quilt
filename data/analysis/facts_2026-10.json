@@ -507,6 +507,193 @@
       }
     },
     {
+      "question": "valuation",
+      "id": "val_markets",
+      "text": "Trailing P/E against each market's own history (percentile of up to 20 years): cheapest Korea 8.4 (9th, Cheap), Hong Kong 13.4 (10th, Cheap), Midcap 150 26.3 (22nd, Below average); most expensive Taiwan 25.1 (96th, Expensive), Germany 18.2 (95th, Expensive), UK 17.1 (91st, Expensive), S&P 500 23.6 (85th, Expensive). India's Nifty 50 at 19.3 sits at the 49th percentile (Average).",
+      "flag": false,
+      "numbers": {
+        "readings": [
+          {
+            "id": "GL_KR",
+            "pe": 8.43,
+            "pctl": 9.2,
+            "label": "Cheap"
+          },
+          {
+            "id": "GL_HK",
+            "pe": 13.42,
+            "pctl": 10.4,
+            "label": "Cheap"
+          },
+          {
+            "id": "IN_MID",
+            "pe": 26.27,
+            "pctl": 22.1,
+            "label": "Below average"
+          },
+          {
+            "id": "GL_CN_LARGE",
+            "pe": 9.14,
+            "pctl": 23.3,
+            "label": "Below average"
+          },
+          {
+            "id": "IN_SMALL",
+            "pe": 31.28,
+            "pctl": 45.9,
+            "label": "Average"
+          },
+          {
+            "id": "IN_LARGE",
+            "pe": 19.3,
+            "pctl": 49.2,
+            "label": "Average"
+          },
+          {
+            "id": "EM",
+            "pe": 13.23,
+            "pctl": 54.2,
+            "label": "Average"
+          },
+          {
+            "id": "GL_JP",
+            "pe": 14.58,
+            "pctl": 57.5,
+            "label": "Average"
+          },
+          {
+            "id": "US_TECH",
+            "pe": 26.16,
+            "pctl": 67.1,
+            "label": "Above average"
+          },
+          {
+            "id": "US_LARGE",
+            "pe": 23.63,
+            "pctl": 85.4,
+            "label": "Expensive"
+          },
+          {
+            "id": "GL_UK",
+            "pe": 17.07,
+            "pctl": 91.2,
+            "label": "Expensive"
+          },
+          {
+            "id": "GL_DE",
+            "pe": 18.16,
+            "pctl": 95.4,
+            "label": "Expensive"
+          },
+          {
+            "id": "GL_TW",
+            "pe": 25.11,
+            "pctl": 96.2,
+            "label": "Expensive"
+          }
+        ]
+      }
+    },
+    {
+      "question": "valuation",
+      "id": "val_india",
+      "text": "Nifty 50 P/E 19.3 against a median of 19.3 (49th percentile since 2005); P/B 2.83 (6th percentile); dividend yield 1.42%; Midcap 150 P/E 26.3 against a median of 30.5 (22nd percentile since 2021); Smallcap 250 P/E 31.3 against a median of 31.8 (46th percentile since 2017). Nifty 50 P/E before April 2021 is adjusted for NSE's switch to consolidated earnings; where that switch moved an index's P/E by more than a quarter, its P/E history starts in April 2021. P/E and P/B disagree by 43 percentile points: P/B is near the bottom of its history even though P/E is not, so the reading depends on the measure.",
+      "flag": true,
+      "numbers": {
+        "nifty_pe": 19.3,
+        "nifty_pctl": 49.1667,
+        "nifty_pb": 2.83,
+        "nifty_pb_pctl": 5.8333,
+        "nifty_median": 19.3411
+      }
+    },
+    {
+      "question": "valuation",
+      "id": "val_bonds",
+      "text": "Earnings yield minus the local 10-year bond yield (shares vs bonds): Smallcap 250 -4.18pp (30th percentile), Midcap 150 -3.57pp (28th percentile), Nifty 50 -2.20pp (55th percentile), Nasdaq 100 -1.31pp (5th percentile), S&P 500 -0.90pp (1st percentile), UK +0.52pp (1st percentile), Germany +2.02pp (0th percentile), Hong Kong +2.32pp (20th percentile), Japan +3.89pp (9th percentile), China large caps +9.29pp (91st percentile). Shares look unusually poor value against bonds (bottom tenth of their history) in Nasdaq 100, S&P 500, UK, Germany, Japan.",
+      "flag": true,
+      "numbers": {
+        "gaps": {
+          "IN_SMALL": -4.183,
+          "IN_MID": -3.573,
+          "IN_LARGE": -2.199,
+          "US_TECH": -1.308,
+          "US_LARGE": -0.899,
+          "GL_UK": 0.519,
+          "GL_DE": 2.021,
+          "GL_HK": 2.323,
+          "GL_JP": 3.893,
+          "GL_CN_LARGE": 9.291
+        }
+      }
+    },
+    {
+      "question": "valuation",
+      "id": "val_sectors",
+      "text": "Indian sectors against their own P/E history: cheapest Realty 34.4 (3rd), FMCG 30.0 (11th), Bank 12.2 (12th); most expensive Pharma 42.7 (75th), Energy 13.8 (66th), Infra 21.8 (60th).",
+      "flag": false,
+      "numbers": {
+        "readings": [
+          {
+            "id": "IN_REALTY",
+            "pe": 34.41,
+            "pctl": 3.1
+          },
+          {
+            "id": "IN_FMCG",
+            "pe": 29.98,
+            "pctl": 11.4
+          },
+          {
+            "id": "IN_BANK",
+            "pe": 12.23,
+            "pctl": 11.9
+          },
+          {
+            "id": "IN_METAL",
+            "pe": 14.58,
+            "pctl": 35.3
+          },
+          {
+            "id": "IN_AUTO",
+            "pe": 29.06,
+            "pctl": 47.7
+          },
+          {
+            "id": "IN_IT",
+            "pe": 19.98,
+            "pctl": 54.0
+          },
+          {
+            "id": "IN_INFRA",
+            "pe": 21.79,
+            "pctl": 60.3
+          },
+          {
+            "id": "IN_ENERGY",
+            "pe": 13.77,
+            "pctl": 65.8
+          },
+          {
+            "id": "IN_PHARMA",
+            "pe": 42.68,
+            "pctl": 75.2
+          }
+        ]
+      }
+    },
+    {
+      "question": "valuation",
+      "id": "val_revisions",
+      "text": "Treat with care: Japan P/E moved -23% while its price moved -4.7%, which points to an update in the earnings data rather than a change in how the market is priced.",
+      "flag": true,
+      "numbers": {
+        "ids": [
+          "GL_JP"
+        ]
+      }
+    },
+    {
       "question": "positioning",
       "id": "pos_us",
       "text": "US futures positioning: Crude oil (WTI): hedge-fund net long +1.7% of open interest (13th percentile of 3 years: Normal); Gold: hedge-fund net long +26.6% of open interest (37th percentile of 3 years: Normal); Silver: hedge-fund net long +2.9% of open interest (3rd percentile of 3 years: Most bearish in 3 years); Copper: hedge-fund net long +12.0% of open interest (40th percentile of 3 years: Normal); S&P 500 futures: leveraged-fund net -20.5% of open interest (19th percentile of 3 years: Normal); Nasdaq 100 futures: leveraged-fund net +0.9% of open interest (94th percentile of 3 years: Most bullish in 3 years); US Treasury bond futures: asset-manager net +20.3% of open interest (0th percentile of 3 years: Most bearish in 3 years); US dollar index: leveraged-fund net +6.5% of open interest (69th percentile of 3 years: Normal).",

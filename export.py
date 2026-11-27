@@ -4,7 +4,7 @@ export.py — package the quilt tables as the data files the published page
 reads. Each file is JSON {rows, meta}: the rows, plus the code that produced
 them, so a reader can check how every number was worked out.
 
-Writes data/export/{layer2,layer3_in,layer3_us,layer3_gl,layer1,catalysts,quality,...}.json.
+Writes data/export/{layer2,layer3_in,layer3_us,layer3_gl,layer1,valuation,backtest,catalysts,quality,...}.json.
 Run after run.py and quilt.py.
 """
 
@@ -146,6 +146,53 @@ def main():
                         detail=f"{n['PASS']} pass, {n['WARN']} warn, {n['FAIL']} fail of {sum(n.values())}"))
     write("quality", pd.DataFrame(rows),
           [{"label": "validate.py", "value": code("validate.py"), "type": "code", "lang": "python"}])
+
+
+    # Valuations: each market's P/E against its own history (valuation.py)
+    vf = os.path.join(HERE, "data", "valuation", "valuation.csv")
+    if os.path.exists(vf):
+        v = pd.read_csv(vf)
+        v["key"] = "val|" + v["id"]
+        v["order"] = range(len(v))
+        for c in ["first_month", "read_month", "pe_now_date", "obs_date"]:
+            if c in v.columns:
+                v[c] = v[c].astype(str).str[:10].replace({"nan": None, "NaT": None, "None": None})
+        cols = ["key", "order", "id", "name", "group", "read_month", "pe", "pctl", "label", "median_pe", "pb", "pb_pctl", "dy",
+                "y10", "ey", "ey_gap", "gap_pctl", "pe_chg_1", "px_chg_1", "earn_chg_1", "revision", "pe_now", "pe_now_date",
+                "yahoo_pe", "source", "first_month", "years", "note", "etf"]
+        write("valuation", v[[c for c in cols if c in v.columns]],
+              [{"label": "valuation.py", "value": code("valuation.py"), "type": "code", "lang": "python"},
+               {"label": "Sources", "value": "NSE Indices daily P/E, P/B and dividend yield (niftyindices.com); worldperatio.com monthly "
+                                             "P/E history for US-listed country funds; Yahoo fund P/E (today, cross-check); 10-year yields as in the rates panel"}])
+    # Backtest: would the signals have helped in the past? (backtest.py)
+    bf = os.path.join(HERE, "data", "backtest", "results.json")
+    if os.path.exists(bf):
+        B = json.load(open(bf))
+        brow = [dict(kind="meta", key="meta", order=0, generated=B["generated"],
+                     text=f"Run on {B['generated']}. Indian tests start in 2005 (NSE total-return indices), US and world-market tests in the "
+                          "1990s or 2000s, the regime gauge in 2007, and some alerts later, when their data begins. Foreign-flow alerts use NSDL "
+                          "data from 2023 only for now.")]
+        for i, x in enumerate(B["summary"]):
+            brow.append(dict(kind="summary", key=f"sum|{i}", order=10 + i, test=x["test"], signal=x["signal"], verdict=x["verdict"],
+                             text=x["text"], n=x["n"]))
+        for r in B["valuation"]["single"]:
+            if r["horizon"] == "5 years":
+                for j, b in enumerate(r["buckets"]):
+                    brow.append(dict(kind="bucket", key=f"bkt|{r['market']}|{j}", order=200 + j, market=r["market"], ccy=r["ccy"],
+                                     bucket=b["bucket"], avg_fwd=b["avg_fwd"], n=b["n_months"], start=r["start"], end=r["end"]))
+        for i, a in enumerate(B["alerts"]):
+            h = {(x["asset"], x["months"]): x for x in a["horizons"] if x.get("n")}
+            nf, ot = h.get(("Nifty 50", 3)), h.get((a["other"], 3))
+            vds = [x.get("verdict") for x in (nf, ot) if x]
+            rank = {"Useful": 3, "Weak": 2, "No evidence": 1, "Too few to judge": 0}
+            brow.append(dict(kind="alert", key=f"alert|{a['id']}", order=300 + i, signal=a["alert"], events=a["events"],
+                             data_from=a["data_from"], other=a["other"],
+                             nifty_avg=nf["avg"] if nf else None, nifty_base=nf["base"] if nf else None, nifty_hit=nf["hit"] if nf else None,
+                             other_avg=ot["avg"] if ot else None, other_base=ot["base"] if ot else None, other_hit=ot["hit"] if ot else None,
+                             verdict=max(vds, key=lambda z: rank[z]) if vds else "Too few to judge"))
+        write("backtest", pd.DataFrame(brow),
+              [{"label": "backtest.py", "value": code("backtest.py"), "type": "code", "lang": "python"},
+               {"label": "Full results (every table, with sample sizes)", "value": json.dumps({k: B[k] for k in B if k != "summary"}, indent=1, default=str)[:200000]}])
 
     # Monthly read: the latest memo, written only from that month's facts file.
     # Memo files are memos/<YYYY-MM>.json; companions (_context, _implications) are read alongside.

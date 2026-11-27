@@ -280,6 +280,70 @@ def rbi_mmo(_):
     return _save_cache("rbi_mmo", "F", pd.concat([cached, pd.Series(rows, dtype=float)]))
 
 
+def nifty_pepb(name, start=None):
+    """Daily P/E, P/B and dividend yield for an NSE index, from niftyindices.com.
+    Incremental and cached (values are never revised). Returns a DataFrame with
+    columns pe, pb, dy indexed by date. NSE switched index P/E from standalone to
+    consolidated earnings on 31 March 2021; valuation.py adjusts for the break."""
+    p = _cache_path("nifty_pepb", name)
+    cached = pd.read_csv(p, parse_dates=["date"]).set_index("date") if os.path.exists(p) else pd.DataFrame(columns=["pe", "pb", "dy"])
+    first = start or dt.date(2005, 1, 1)
+    if not cached.empty:          # history is fetched once; later runs only add new days
+        chunks = [(cached.index.max().date() - dt.timedelta(days=7), dt.date.today())]
+    else:
+        chunks = [(first, dt.date.today())]
+    rows = {}
+    for a, end in chunks:
+        while a <= end:
+            b = min(a + dt.timedelta(days=360), end)
+            for rec in _ni_post("getpepbHistoricaldataDBtoString", name, a, b):
+                try:
+                    d = pd.Timestamp(dt.datetime.strptime(rec["DATE"].strip(), "%d %b %Y"))
+                    rows[d] = [float(str(rec[k]).replace(",", "")) if str(rec[k]).strip() not in ("", "-") else None
+                               for k in ("pe", "pb", "divYield")]
+                except (ValueError, KeyError, AttributeError):
+                    continue
+            a = b + dt.timedelta(days=1)
+    new = pd.DataFrame.from_dict(rows, orient="index", columns=["pe", "pb", "dy"])
+    df = pd.concat([cached, new]) if not cached.empty else new
+    df = df[~df.index.duplicated(keep="last")].sort_index()
+    df.index.name = "date"
+    df.to_csv(p)
+    return df
+
+
+def worldperatio(slug):
+    """Monthly trailing P/E history for a country or index ETF from worldperatio.com
+    (estimated from the ETF's holdings; e.g. slug 'area/japan' is EWJ). Returns
+    (series, etf_ticker). The site's latest point is the current month to date."""
+    t = session().get(f"https://worldperatio.com/{slug}/", timeout=40).text
+    time.sleep(1.0)
+    i = t.find("detailPE_data = ")
+    if i < 0:
+        raise ValueError(f"worldperatio: no P/E history on {slug}")
+    blob = t[i:t.find(";", i)]
+    pts = re.findall(r"Date\.UTC\((\d+),\s*(\d+),\s*(\d+)\),([\d.\-]+)", blob)
+    s = pd.Series({pd.Timestamp(int(y), int(m) + 1, 1) + pd.offsets.MonthEnd(0): float(v) for y, m, d, v in pts}, dtype=float)
+    etf = re.search(r"calculated on the\s*(?:<[^>]+>)*\s*([A-Z]{2,5})\s*(?:<[^>]+>)*\s*Etf", t)
+    _save_cache("worldperatio", slug, s)
+    return s, (etf.group(1) if etf else None)
+
+
+def yahoo_pe(tickers):
+    """Today's trailing P/E for ETFs from Yahoo (fund summary). Current value only,
+    used as an independent cross-check and for funds with no P/E history."""
+    import yfinance as yf
+    out = {}
+    for t in tickers:
+        try:
+            v = yf.Ticker(t).info.get("trailingPE")
+            out[t] = float(v) if v else None
+        except Exception:
+            out[t] = None
+        time.sleep(0.3)
+    return out
+
+
 FETCHERS = {
     "nifty_tri": lambda sid: nifty(sid, "tri"),
     "nifty_px": lambda sid: nifty(sid, "px"),

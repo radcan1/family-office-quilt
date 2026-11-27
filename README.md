@@ -3,8 +3,10 @@
 A monthly multi-asset quilt for an INR-based family office: 19 strategic asset
 classes ranked by total return (in rupees and local currency), Indian and US
 sector rotation, world equity markets ranked in rupees, currencies against the
-rupee, global bond yields, a macro and liquidity backdrop, positioning, and
-prediction-market catalysts from Polymarket, cross-checked against Kalshi.
+rupee, global bond yields, valuations (each market's P/E against its own
+history), a macro and liquidity backdrop, positioning, prediction-market
+catalysts from Polymarket cross-checked against Kalshi, and a backtest of
+whether the dashboard's signals would have helped in the past.
 
 **Live site:** https://radcan1.github.io/family-office-quilt/
 
@@ -14,6 +16,8 @@ prediction-market catalysts from Polymarket, cross-checked against Kalshi.
 pip install -r requirements.txt
 python3 run.py             # fetch and validate every series, plus prediction markets (~1 minute)
 python3 positioning.py     # CFTC, NSDL, NSE and options positioning (NSE files fetched politely, cached)
+python3 valuation.py       # P/E, P/B and shares-vs-bonds for each market against its own history
+python3 backtest.py        # rerun monthly: does each signal hold up on long histories?
 python3 quilt.py           # monthly returns, ranks, Layer 1 indicators
 python3 analysis.py        # facts for the latest completed month (and the month before, for changes)
 # then, by hand: research the news (memos/<month>_context.json), write the memo
@@ -40,7 +44,9 @@ Watchlist levels live in `watchlist.json`; edit them freely.
 | `validate.py` | Freshness, total-return basis and cross-source checks |
 | `run.py` | Fetches everything, writes `data/daily/` and the quality report |
 | `quilt.py` | Monthly returns, ranks, 3-month persistence, trend stretch, Layer 1 |
-| `analysis.py` | Facts engine: regime, persistence, divergences, currency, global markets, risks, breadth, positioning |
+| `valuation.py` | Trailing P/E (and P/B for India) against each market's own history; shares vs bonds |
+| `backtest.py` | Tests valuation, the regime gauge, momentum and every watchlist alert on long histories |
+| `analysis.py` | Facts engine: regime, persistence, divergences, currency, global markets, valuations, risks, breadth, positioning |
 | `watch.py` / `watchlist.json` | What we track and the levels that trigger attention |
 | `checks.py` | The health gate run before every publish |
 | `export.py` | Packages the tables as JSON for the page |
@@ -59,6 +65,8 @@ All keyless and public:
 - **World equity markets:** US-listed country ETFs (CQQQ, FXI, ASHR, EWH, EWJ, EWY, EWT, EWG, FEZ, EWU) from Yahoo, with headline indices (Hang Seng, Nikkei, KOSPI, TAIEX, DAX, Euro Stoxx 50, FTSE 100) alongside; CSI 300 from Sina via akshare
 - **Global 10Y yields:** Bundesbank (Germany), Japan Ministry of Finance, Bank of England, ChinaBond (via akshare), FRED (US); each checked against the OECD monthly figure
 - **Currencies vs the rupee:** the Fed's H.10 rates (FRED), with Yahoo for the days since the last print; AED from its fixed dollar peg
+- **Valuations:** NSE Indices daily P/E, P/B and dividend yield for Indian indices and sectors; worldperatio.com monthly P/E history for the US-listed country funds; Yahoo fund P/E as a cross-check; Robert Shiller's S&P 500 data as a long-run check
+- **Backtest:** long histories from the same providers (Yahoo from 1993, NSE total-return indices from 2005, FRED, NSDL FPI flows from 2005)
 - **RBI net liquidity:** the RBI's daily Money Market Operations release
 - **Catalysts:** Polymarket and Kalshi public APIs
 
@@ -68,6 +76,8 @@ All keyless and public:
 - **India 10Y yield and 3M rate:** monthly averages only. There is no free daily feed, so the India–US yield gap uses monthly averages.
 - **World markets:** ranked on country ETFs rather than the headline indices, so dividends and currency are treated the same everywhere. Hong Kong's ETF (EWH) holds local companies only, unlike the Hang Seng.
 - **India M3:** not yet included.
+- **Valuations:** trailing P/E only; forward P/E needs paid analyst forecasts. NSE changed its P/E method on 31 March 2021, and earlier values are scaled to match. Fund-based P/E (worldperatio) reflects each fund's holdings and runs about a quarter below Shiller's S&P 500 P/E, which uses reported earnings. China tech, China A-shares and the euro area have no free P/E history; it builds up month by month. Shiller's free file stopped updating in September 2024, so CAPE is not shown.
+- **Backtest:** descriptive only, with no costs or taxes. Some alerts have triggered only a handful of times, and those results are marked "Too few to judge".
 - **Gold tile:** international gold in INR. Indian gold differs because of import duty and the local premium; the data checks report the gap.
 
 For information and discussion only. Nothing here is investment advice.

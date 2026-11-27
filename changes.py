@@ -28,6 +28,11 @@ def load(month):
     return d, {f["id"]: f for f in d["facts"]}
 
 
+def ordinal(x):
+    n = int(round(x))
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
 def names(ids):
     return ", ".join(SHORT.get(i, i) for i in ids)
 
@@ -132,6 +137,23 @@ def compare(month):
     new_str = [i for i in C["stretch"]["numbers"]["stretched"] if i not in P["stretch"]["numbers"]["stretched"]]
     if new_str:
         add(6, "neutral", f"Newly stretched on trend: {names(new_str)}.")
+
+    # Valuations: markets that moved into or out of the cheap or expensive fifth of their own history
+    if "val_markets" in C and "val_markets" in P:
+        vc = {r["id"]: r for r in C["val_markets"]["numbers"]["readings"]}
+        vp = {r["id"]: r for r in P["val_markets"]["numbers"]["readings"]}
+        ends = ("Cheap", "Expensive")
+        moved = [(i, vp[i], vc[i]) for i in vc if i in vp and vc[i]["label"] != vp[i]["label"] and (vc[i]["label"] in ends or vp[i]["label"] in ends)]
+        if moved:
+            nm = {"IN_LARGE": "Nifty 50", "IN_MID": "Midcap 150", "IN_SMALL": "Smallcap 250", "US_LARGE": "S&P 500", "US_TECH": "Nasdaq 100",
+                  "EM": "Emerging markets"}
+            rev = set(C.get("val_revisions", {}).get("numbers", {}).get("ids", []))
+            add(5, "neutral", "Valuation readings changed: " + "; ".join(
+                f"{nm.get(i, SHORT.get(i, i))} from {a['label']} ({ordinal(a['pctl'])} percentile) to {b['label']} ({ordinal(b['pctl'])})"
+                + (", mostly an earnings-data update" if i in rev else "") for i, a, b in moved) + ".")
+        n0, n1 = vp.get("IN_LARGE"), vc.get("IN_LARGE")
+        if n0 and n1 and abs(n1["pctl"] - n0["pctl"]) >= 10:
+            add(6, "neutral", f"The Nifty 50 P/E moved from the {ordinal(n0['pctl'])} to the {ordinal(n1['pctl'])} percentile of its history ({n0['pe']:.1f} to {n1['pe']:.1f}).")
 
     out.sort(key=lambda x: -x["importance"])
     return dict(month=month, compared_with=prev_month, compared_label=pl, changes=out)

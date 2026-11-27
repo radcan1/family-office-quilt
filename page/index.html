@@ -121,6 +121,33 @@
   .fq .fq-more { border-top: 0; padding-top: 0; }
   .fq .fq-more summary { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 
+
+  /* Valuations and backtest */
+  .fq-val td:nth-child(3) { min-width: 150px; }
+  .fq-vtrack { position: relative; height: 8px; border-radius: 4px; margin: 4px 0 2px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-ok) 35%, transparent) 0 20%, var(--cds-chart-grid, var(--color-border-line)) 20% 80%, color-mix(in srgb, var(--color-bad) 30%, transparent) 80% 100%); }
+  .fq-vtrack::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--color-fg-muted); opacity: .6; }
+  .fq-vtrack i { position: absolute; top: -3px; width: 4px; height: 14px; border-radius: 2px; background: var(--color-fg); transform: translateX(-2px); z-index: 1; }
+  .fq-pill.fq-cheap { color: var(--color-ok); border-color: color-mix(in srgb, var(--color-ok) 45%, transparent); }
+  .fq-pill.fq-dear { color: var(--color-bad); border-color: color-mix(in srgb, var(--color-bad) 45%, transparent); }
+  .fq-bt { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--cds-gap-md); min-height: 160px; align-items: start; }
+  .fq-btcard { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-md); display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .fq-btcard h3 { text-transform: none; letter-spacing: 0; font-size: var(--cds-font-size-body); color: var(--color-fg); }
+  .fq-btcard ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .fq-btcard li { display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; line-height: 1.45; }
+  .fq-btcard li .fq-bt-h { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; font-weight: var(--cds-font-weight-medium); }
+  .fq-btcard li p { color: var(--color-fg-muted); }
+  .fq-pill.fq-useful { color: var(--color-ok); border-color: color-mix(in srgb, var(--color-ok) 45%, transparent); }
+  .fq-pill.fq-weak { color: var(--color-warn); border-color: color-mix(in srgb, var(--color-warn) 45%, transparent); }
+  .fq-btbars { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--cds-gap-lg); min-height: 120px; }
+  .fq-btbars > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .fq-btbar { display: grid; grid-template-columns: 120px 1fr 64px; gap: 8px; align-items: center; font-size: var(--cds-font-size-caption); }
+  .fq-btbar .fq-b { position: relative; height: 14px; }
+  .fq-btbar .fq-b::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--color-border-line); }
+  .fq-btbar .fq-b i { position: absolute; top: 0; height: 100%; border-radius: 2px; background: var(--series-2); }
+  .fq-btbar .fq-b i.fq-negb { background: var(--color-bad); }
+  .fq-btbar .fq-num { text-align: right; }
+
   /* Monthly read */
   .fq-readbox { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-lg); }
   .fq-read-head { font-family: var(--font-anthropic-serif); font-size: 19px; line-height: 1.4; max-width: 80ch; }
@@ -372,6 +399,79 @@
     <div class="fq-group" id="global-rates"><h3>Global bond yields and funds</h3><div class="fq-cards dash-skeleton" data-draw="macro" data-group="Global rates" data-source="layer1"></div></div>
   </section>
 
+  <section class="fq-section" id="valuation">
+    <div class="fq-sechead">
+      <h2>Valuations</h2>
+      <span class="fq-muted">Is each market cheap or expensive against its own history? Trailing P/E at the end of <span data-draw="val-month">—</span></span>
+    </div>
+    <div class="fq-group" id="val-markets">
+      <h3>Major equity markets</h3>
+      <div class="fq-tablewrap">
+        <table class="fq-table fq-val" data-source="valuation" data-row-key="key" aria-label="Equity market valuations against their own history">
+          <thead>
+            <tr>
+              <th data-field="name">Market</th>
+              <th data-field="pe">P/E</th>
+              <th data-field="pctl">Against its own history</th>
+              <th data-field="label">Reading</th>
+              <th data-field="median_pe">Median P/E</th>
+              <th data-field="ey_gap">Shares vs bonds</th>
+              <th data-field="pb">P/B</th>
+              <th data-field="pe_now">P/E now</th>
+              <th data-field="first_month">History</th>
+            </tr>
+          </thead>
+          <tbody data-draw="val-table" data-group="Markets"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="fq-group" id="val-sectors">
+      <h3>Indian sectors</h3>
+      <div class="fq-tablewrap">
+        <table class="fq-table fq-val" data-source="valuation" data-row-key="key" aria-label="Indian sector valuations against their own history">
+          <thead>
+            <tr>
+              <th data-field="name">Sector</th>
+              <th data-field="pe">P/E</th>
+              <th data-field="pctl">Against its own history</th>
+              <th data-field="label">Reading</th>
+              <th data-field="median_pe">Median P/E</th>
+              <th data-field="ey_gap">Shares vs bonds</th>
+              <th data-field="pb">P/B</th>
+              <th data-field="pe_now">P/E now</th>
+              <th data-field="first_month">History</th>
+            </tr>
+          </thead>
+          <tbody data-draw="val-table" data-group="India sectors"></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="fq-muted">The bar shows where this month's P/E sits in the market's own history (up to 20 years; the tick is the middle). Compare each market with its own past, not with other countries: India usually looks expensive next to China or Korea because of faster growth and a different mix of companies. "Shares vs bonds" is the earnings yield (100 ÷ P/E) minus the local 10-year government bond yield: below zero, bonds pay more than shares earn. Valuation is a poor guide to the next few months and a better guide to the next five to ten years; the backtest below shows how well it worked.</p>
+  </section>
+
+  <section class="fq-section" id="backtest">
+    <div class="fq-sechead">
+      <h2>Do the signals work?</h2>
+      <span class="fq-muted">A backtest of the dashboard's signals on long public histories</span>
+    </div>
+    <p class="fq-muted fq-bt-intro" data-draw="bt-intro" data-source="backtest">—</p>
+    <div class="fq-bt dash-skeleton" data-draw="bt-summary" data-source="backtest"></div>
+    <div class="fq-group" id="bt-valuation">
+      <h3>Starting valuation and the next five years</h3>
+      <div class="fq-btbars dash-skeleton" data-draw="bt-buckets" data-source="backtest"></div>
+    </div>
+    <div class="fq-group" id="bt-alerts">
+      <h3>What happened after each watchlist alert</h3>
+      <div class="fq-tablewrap">
+        <table class="fq-table" data-source="backtest" data-row-key="key" aria-label="Returns after each watchlist alert">
+          <thead><tr><th data-field="signal">Alert</th><th data-field="events">Times</th><th data-field="nifty_3m">Nifty 50, next 3 months</th><th data-field="other_3m">Other asset, next 3 months</th><th data-field="verdict">Verdict</th></tr></thead>
+          <tbody data-draw="bt-alerts"></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="fq-muted">Each test uses only the data available at the time of the signal. Overlapping periods overstate the evidence, so every result is judged on independent periods: <b>Useful</b> means a clear effect (about two standard errors) that held in both halves of the history; <b>Weak</b> means an effect that is small or inconsistent; <b>No evidence</b> means no reliable effect; <b>Too few to judge</b> means fewer than five independent periods. No costs or taxes are included. Past patterns can break.</p>
+  </section>
+
   <section class="fq-section" id="catalysts">
     <div class="fq-sechead">
       <h2>Forward catalysts</h2>
@@ -405,6 +505,10 @@
       <dt>World markets</dt><dd>Each market is a US-listed country fund (for example EWJ for Japan, CQQQ for China tech) with dividends included, converted to rupees. India is the Nifty 50 total-return index. CSI 300 comes from Sina because Yahoo's copy was unreliable.</dd>
       <dt>Currencies against the rupee</dt><dd>Rupees per unit of each currency, built on the same USD/INR series used everywhere else. Up means that currency strengthened against the rupee, which helps a rupee investor holding it. The dirham is pegged to the dollar at 3.6725.</dd>
       <dt>Global yields</dt><dd>Daily 10-year yields from each official publisher: the Fed (FRED), Bundesbank, Japan's Ministry of Finance, Bank of England and ChinaBond. India's is a monthly average because there is no free daily feed. The data checks compare each daily feed with the OECD's monthly figure.</dd>
+      <dt>Valuation (P/E)</dt><dd>Share price divided by the last 12 months' earnings. Indian indices use NSE's official figures, adjusted for NSE's switch from standalone to consolidated earnings in April 2021. Other markets use the P/E of the same country funds used above, from worldperatio.com, cross-checked against Yahoo. Forward P/E needs paid analyst forecasts and is not shown.</dd>
+      <dt>Against its own history</dt><dd>The share of month-ends in the last 20 years (or all available history, at least 5 years) when the P/E was lower than now. Cheap is the bottom fifth, Expensive the top fifth.</dd>
+      <dt>Shares vs bonds</dt><dd>Earnings yield (100 ÷ P/E) minus the local 10-year government bond yield. Hong Kong uses the US yield because its currency is pegged to the dollar. Korea, Taiwan and emerging markets have no free daily yield series here.</dd>
+      <dt>Backtest</dt><dd>Each signal is rebuilt month by month from data available at the time, and judged on independent periods, not overlapping ones. Results describe the past; they are not a trading strategy and ignore costs and taxes.</dd>
       <dt>Current month</dt><dd>The last column is month to date and its tiles have a dashed outline. Rankings there will change.</dd>
     </dl>
   </details>
@@ -772,6 +876,119 @@
       tr.append(td(r.name), ret(r.ret_inr), r.ccy === 'USD' ? ret(r.ret_local) : td('—', 'fq-num'),
         td(r.idx_name ? r.idx_name + ' (' + r.idx_ccy + ')' : '—'), ret(r.idx_ret),
         ret(r.ret_3m), td(r.rank, 'fq-num'), flags);
+      return tr;
+    }));
+  });
+
+
+  // ── Valuations ───────────────────────────────────────────────────────────
+  const ord = (n) => { n = Math.round(n); const t = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' })[n % 10] || 'th'; return n + t; };
+  dash.draw('val-month', (el) => {
+    const d = FQ.rows('valuation'); const r = d.rows.find(x => x.read_month);
+    el.textContent = r ? FQ.monthLong(r.read_month.slice(0, 7)) : '—';
+  });
+  dash.draw('val-table', (tb) => {
+    const d = FQ.rows('valuation');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    const grp = tb.dataset.group;
+    const rows = d.rows.filter(r => r.group === grp).sort((a, b) => a.order - b.order);
+    tb.replaceChildren(...rows.map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const bar = document.createElement('td');
+      if (r.pctl != null) {
+        const t = document.createElement('div'); t.className = 'fq-vtrack';
+        const i = document.createElement('i'); i.style.left = Math.max(0, Math.min(100, r.pctl)) + '%'; t.append(i);
+        const lab = document.createElement('div'); lab.className = 'fq-pctl'; lab.textContent = ord(r.pctl) + ' percentile';
+        bar.append(t, lab);
+      } else { bar.className = 'fq-muted'; bar.textContent = r.pe_now != null ? 'History builds from Nov 2026' : '—'; }
+      const st = document.createElement('td'); const pill = document.createElement('span');
+      pill.className = 'fq-pill' + (/^Cheap|^Below/.test(r.label) ? ' fq-cheap' : /^Expensive|^Above/.test(r.label) ? ' fq-dear' : '');
+      pill.textContent = r.label || '—'; st.append(pill);
+      if (r.revision === true || r.revision === 'True') { const w = document.createElement('div'); w.className = 'fq-pctl'; w.textContent = 'P/E jump looks like an earnings-data update'; st.append(w); }
+      const gap = td(r.ey_gap == null ? '—' : FQ.signed(r.ey_gap) + 'pp', 'fq-num' + (r.ey_gap < 0 ? ' fq-neg' : ''));
+      if (r.gap_pctl != null) { const g = document.createElement('div'); g.className = 'fq-pctl'; g.textContent = ord(r.gap_pctl) + ' percentile'; gap.append(g); }
+      const pb = td(r.pb == null ? '—' : FQ.num(r.pb, 2), 'fq-num');
+      if (r.pb_pctl != null) { const g = document.createElement('div'); g.className = 'fq-pctl'; g.textContent = ord(r.pb_pctl) + ' pctl'; pb.append(g); }
+      const name = td(r.name); if (r.note) name.title = r.note;
+      const src = document.createElement('div'); src.className = 'fq-pctl'; src.textContent = r.source; name.append(src);
+      const hist = td(r.first_month && r.years >= 1 ? 'since ' + r.first_month.slice(0, 4) : 'new', 'fq-num');
+      tr.append(name, td(r.pe == null ? '—' : FQ.num(r.pe, 1), 'fq-num'), bar, st, td(r.median_pe == null ? '—' : FQ.num(r.median_pe, 1), 'fq-num'),
+        gap, pb, td(r.pe_now == null ? '—' : FQ.num(r.pe_now, 1), 'fq-num'), hist);
+      return tr;
+    }));
+  });
+
+  // ── Backtest ─────────────────────────────────────────────────────────────
+  const btRows = (kind) => FQ.rows('backtest').rows.filter(r => r.kind === kind).sort((a, b) => a.order - b.order);
+  const vClass = (v) => 'fq-pill' + (v === 'Useful' ? ' fq-useful' : v === 'Weak' ? ' fq-weak' : '');
+  dash.draw('bt-intro', (el) => { const m = btRows('meta')[0]; el.textContent = m ? m.text : '—'; });
+  dash.draw('bt-summary', (el) => {
+    const d = FQ.rows('backtest');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the backtest');
+    FQ.done(el);
+    const groups = [['Valuation', 'Valuation: cheap vs expensive'], ['Regime', 'The regime gauge'], ['Momentum', 'Momentum: do leaders keep leading?']];
+    el.replaceChildren(...groups.map(([t, title]) => {
+      const card = document.createElement('div'); card.className = 'fq-btcard';
+      const h = document.createElement('h3'); h.textContent = title;
+      const ul = document.createElement('ul');
+      btRows('summary').filter(r => r.test === t).forEach(r => {
+        const li = document.createElement('li'); li.dataset.source = 'backtest'; li.dataset.where = 'key=' + r.key;
+        const hd = document.createElement('div'); hd.className = 'fq-bt-h';
+        const nm = document.createElement('span'); nm.textContent = r.signal;
+        const pill = document.createElement('span'); pill.className = vClass(r.verdict); pill.textContent = r.verdict;
+        hd.append(nm, pill);
+        const p = document.createElement('p'); p.textContent = r.text;
+        li.append(hd, p); ul.append(li);
+      });
+      card.append(h, ul); return card;
+    }));
+  });
+  dash.draw('bt-buckets', (el) => {
+    const d = FQ.rows('backtest');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the backtest');
+    FQ.done(el);
+    const rows = btRows('bucket');
+    const by = new Map(); rows.forEach(r => { if (!by.has(r.market)) by.set(r.market, []); by.get(r.market).push(r); });
+    const maxAbs = Math.max(0.05, ...rows.map(r => Math.abs(r.avg_fwd || 0)));
+    el.replaceChildren(...[...by].map(([mkt, rs]) => {
+      const box = document.createElement('div');
+      const h = document.createElement('div'); h.className = 'fq-muted';
+      h.textContent = mkt + ': average yearly return over the next 5 years (' + rs[0].ccy + '), by starting P/E percentile, ' + rs[0].start.slice(0, 4) + '–' + rs[0].end.slice(0, 4);
+      box.append(h);
+      rs.forEach(r => {
+        const row = document.createElement('div'); row.className = 'fq-btbar'; row.dataset.source = 'backtest'; row.dataset.where = 'key=' + r.key;
+        const l = document.createElement('span'); l.textContent = r.bucket;
+        const b = document.createElement('div'); b.className = 'fq-b';
+        const enough = r.avg_fwd != null && r.n >= 6;
+        if (enough) {
+          const i = document.createElement('i'); const w = Math.abs(r.avg_fwd) / maxAbs * 50;
+          i.style.width = w + '%'; i.style.left = r.avg_fwd >= 0 ? '50%' : (50 - w) + '%'; if (r.avg_fwd < 0) i.className = 'fq-negb'; b.append(i);
+        }
+        const v = document.createElement('span'); v.className = 'fq-num'; v.textContent = r.avg_fwd == null || !r.n ? 'no months' : r.n < 6 ? r.n + ' month' + (r.n > 1 ? 's' : '') + ': too few' : FQ.pct(r.avg_fwd);
+        v.title = (r.n || 0) + ' starting months';
+        row.append(l, b, v); box.append(row);
+      });
+      return box;
+    }));
+  });
+  dash.draw('bt-alerts', (tb) => {
+    const d = FQ.rows('backtest');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    tb.replaceChildren(...btRows('alert').map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const cell = (avg, base, hit, label) => {
+        const c = td(avg == null ? '—' : FQ.pct(avg), 'fq-num' + (avg < 0 ? ' fq-neg' : ''));
+        if (avg != null) { const s = document.createElement('div'); s.className = 'fq-pctl'; s.textContent = (label ? label + ': ' : '') + 'normal ' + FQ.pct(base) + ', up ' + Math.round(hit * 100) + '% of times'; c.append(s); }
+        return c;
+      };
+      const st = document.createElement('td'); const pill = document.createElement('span'); pill.className = vClass(r.verdict); pill.textContent = r.verdict; st.append(pill);
+      const nm = td(r.signal, 'fq-l');
+      tr.append(nm, td(r.events + (r.events ? ' since ' + r.data_from.slice(0, 4) : ''), 'fq-num'),
+        cell(r.nifty_avg, r.nifty_base, r.nifty_hit), cell(r.other_avg, r.other_base, r.other_hit, r.other), st);
       return tr;
     }));
   });

@@ -2,8 +2,8 @@
 """
 analysis.py — the facts engine for the monthly read (see ANALYSIS.md).
 
-Reads the quilt tables (data/quilt/*.csv, from quilt.py) and the latest
-catalyst snapshot, and works out a fixed set of findings for one completed
+Reads the quilt tables (data/quilt/*.csv, from quilt.py), the valuation
+history (data/valuation/, from valuation.py) and the latest catalyst snapshot, and works out a fixed set of findings for one completed
 month. Every finding carries its numbers and is produced by a written rule,
 so the memo can be checked line by line.
 
@@ -325,6 +325,67 @@ def main():
               flag=(fxr.chg_1.abs() >= 0.03).any(), month={lab(r): f(r.chg_1, 4) for r in fxr.itertuples()},
               year={lab(r): f(r.chg_12, 4) for r in fxr.itertuples()})
 
+
+    # ── 9. Valuations: each market against its own history (valuation.py) ───
+    vf = os.path.join(HERE, "data", "valuation", "valuation_hist.csv")
+    if os.path.exists(vf):
+        vh = pd.read_csv(vf, parse_dates=["month"])
+        v = vh[vh.month == M].copy()
+        mk = v[(v.group == "Markets") & v.pctl.notna()].sort_values("pctl")
+        if len(mk):
+            nm = lambda r: r["name"].replace("India: ", "").replace("US: ", "")
+            cheap, dear = mk.head(3), mk.tail(4).iloc[::-1]
+            n50 = v[v.id == "IN_LARGE"]
+            n50 = n50.iloc[0] if len(n50) else None
+            F.add("valuation", "val_markets",
+                  "Trailing P/E against each market's own history (percentile of up to 20 years): cheapest " +
+                  ", ".join(f"{nm(r)} {r.pe:.1f} ({ordinal(r.pctl)}, {r.label})" for _, r in cheap.iterrows()) + "; most expensive " +
+                  ", ".join(f"{nm(r)} {r.pe:.1f} ({ordinal(r.pctl)}, {r.label})" for _, r in dear.iterrows()) + "."
+                  + (f" India's Nifty 50 at {n50.pe:.1f} sits at the {ordinal(n50.pctl)} percentile ({n50.label})." if n50 is not None else ""),
+                  flag=n50 is not None and (n50.pctl >= 80 or n50.pctl <= 20),
+                  readings=[dict(id=r.id, pe=f(r.pe, 2), pctl=f(r.pctl, 1), label=r.label) for _, r in mk.iterrows()])
+        ind_rows = v[v.id.isin(["IN_LARGE", "IN_MID", "IN_SMALL"])].set_index("id")
+        if "IN_LARGE" in ind_rows.index:
+            n = ind_rows.loc["IN_LARGE"]
+            gap = abs(n.pctl - n.pb_pctl) if pd.notna(n.pb_pctl) else 0
+            parts = [f"Nifty 50 P/E {n.pe:.1f} against a median of {n.median_pe:.1f} ({ordinal(n.pctl)} percentile since {pd.Timestamp(n.first_month):%Y}); "
+                     f"P/B {n.pb:.2f} ({ordinal(n.pb_pctl)} percentile); dividend yield {n.dy:.2f}%"]
+            for i, lab in [("IN_MID", "Midcap 150"), ("IN_SMALL", "Smallcap 250")]:
+                if i in ind_rows.index and pd.notna(ind_rows.loc[i, "pctl"]):
+                    r = ind_rows.loc[i]
+                    parts.append(f"{lab} P/E {r.pe:.1f} against a median of {r.median_pe:.1f} ({ordinal(r.pctl)} percentile since {pd.Timestamp(r.first_month):%Y})")
+            F.add("valuation", "val_india",
+                  "; ".join(parts) + ". Nifty 50 P/E before April 2021 is adjusted for NSE's switch to consolidated earnings; where that switch "
+                  "moved an index's P/E by more than a quarter, its P/E history starts in April 2021."
+                  + (f" P/E and P/B disagree by {gap:.0f} percentile points: P/B is near the bottom of its history even though P/E is not, "
+                     "so the reading depends on the measure." if gap > 40 else ""),
+                  flag=gap > 40 or n.pctl >= 80 or n.pctl <= 20,
+                  nifty_pe=n.pe, nifty_pctl=n.pctl, nifty_pb=n.pb, nifty_pb_pctl=n.pb_pctl, nifty_median=n.median_pe)
+        bg = v[(v.group == "Markets") & v.ey_gap.notna()].sort_values("ey_gap")
+        if len(bg):
+            low = bg[bg.gap_pctl <= 10]
+            F.add("valuation", "val_bonds",
+                  "Earnings yield minus the local 10-year bond yield (shares vs bonds): " +
+                  ", ".join(f"{r['name'].replace('India: ', '').replace('US: ', '')} {r.ey_gap:+.2f}pp" +
+                            (f" ({ordinal(r.gap_pctl)} percentile)" if pd.notna(r.gap_pctl) else "") for _, r in bg.iterrows()) + ". "
+                  + (("Shares look unusually poor value against bonds (bottom tenth of their history) in " +
+                      ", ".join(r["name"].replace("India: ", "").replace("US: ", "") for _, r in low.iterrows()) + ".") if len(low) else
+                     "No market is in the bottom tenth of its own history on this measure."),
+                  flag=len(low) > 0, gaps={r.id: f(r.ey_gap, 3) for _, r in bg.iterrows()})
+        sc = v[(v.group == "India sectors") & v.pctl.notna()].sort_values("pctl")
+        if len(sc):
+            F.add("valuation", "val_sectors",
+                  "Indian sectors against their own P/E history: cheapest " +
+                  ", ".join(f"{r['name']} {r.pe:.1f} ({ordinal(r.pctl)})" for _, r in sc.head(3).iterrows()) + "; most expensive " +
+                  ", ".join(f"{r['name']} {r.pe:.1f} ({ordinal(r.pctl)})" for _, r in sc.tail(3).iloc[::-1].iterrows()) + ".",
+                  readings=[dict(id=r.id, pe=f(r.pe, 2), pctl=f(r.pctl, 1)) for _, r in sc.iterrows()])
+        rv = v[v.revision.astype(str) == "True"]
+        if len(rv):
+            F.add("valuation", "val_revisions",
+                  "Treat with care: " + ", ".join(f"{r['name']} P/E moved {r.pe_chg_1*100:+.0f}% while its price moved {r.px_chg_1*100:+.1f}%" for _, r in rv.iterrows())
+                  + ", which points to an update in the earnings data rather than a change in how the market is priced.",
+                  flag=True, ids=rv.id.tolist())
+
     # ── 7. Positioning: how money is placed (positioning.py) ─────────────────
     gfile = os.path.join(HERE, "data", "positioning", "gauges.csv")
     if os.path.exists(gfile):
@@ -422,7 +483,7 @@ def main():
                  facts=F.items)
     key = M.strftime("%Y-%m")
     json.dump(facts, open(os.path.join(OUT, f"facts_{key}.json"), "w"), indent=2, default=str)
-    order = ["regime", "persistence", "divergence", "currency", "global", "risks", "breadth", "positioning"]
+    order = ["regime", "persistence", "divergence", "currency", "global", "valuation", "risks", "breadth", "positioning"]
     lines = [f"# Facts for {label}", ""]
     for q in order:
         lines.append(f"## {q.capitalize()}")
