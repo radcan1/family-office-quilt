@@ -31,6 +31,10 @@
       "body": "Prediction markets, as of 27 November, put a 25bp Fed hike in December at 94% (up from 76% thirty days earlier) and no Fed cuts this year at 98%. A 25bp RBI hike is priced at 88%, but that market is thin. The largest repricings were in Bitcoin, where the odds of falling to $55,000 at some point before year-end rose from 10% to 46% and of reaching $90,000 fell from 44% to 3%, and in gold, where the odds of falling to $3,500 by December rose from 11% to 62%. A US recession by year-end is priced at 3%; an AI bubble burst by June 2027 at 36% (up 14 points). Polymarket and Kalshi agree on all 6 outcomes checked. The VIX (19.4) and India VIX (15.3) are both up over 3 months. No asset is stretched on trend."
     },
     {
+      "title": "Positioning: some bets lean against October's moves",
+      "body": "Leveraged funds are the most bullish on Nasdaq 100 futures in three years (94th percentile) even though the index fell 6.7% in October, so further selling could follow if they cut those positions. Asset managers hold their smallest Treasury bond long in three years (0th percentile) while bonds rallied 5.6%. Foreign investors sold a net ₹34,843 crore of Indian equities in October, yet the Nifty 50 rose 2.0%: domestic buyers carried the market. Hedge funds are the least long on silver in three years (3rd percentile). Looking ahead, options price a Nifty move of about ±3.5% by the 29 December expiry and ±4.9% for the S&P 500 by 18 December (as of 26–27 November)."
+    },
+    {
       "title": "Breadth: a narrow month",
       "body": "Only 4 of 19 assets rose in rupees and 3 beat INR cash (+0.45%): Brent (+17.7%), US long Treasuries (+4.7%) and the Nifty 50 (+2.0%). The gap from best to worst was 36.6pp, Brent to silver (−18.9%). Cross-asset dispersion was 7.1%, a little above its 12-month median of 6.4%."
     }
@@ -40,6 +44,7 @@
     "Brent has led for three months (+41%). Is our energy and commodity exposure a deliberate position or drift?",
     "Indian IT and global semiconductors moved 33 points apart in a month. Which side of the AI trade are we on, and through which holdings?",
     "Markets price a December Fed hike at 94%. How exposed are our long-duration bonds and US holdings to a hike?",
-    "The rupee has weakened 7% over 12 months but strengthened in October. Should any of the dollar sleeve be hedged?"
+    "The rupee has weakened 7% over 12 months but strengthened in October. Should any of the dollar sleeve be hedged?",
+    "Domestic buyers absorbed ₹34,843 crore of foreign selling in October. How much do our Indian holdings depend on that domestic flow continuing?"
   ]
 }

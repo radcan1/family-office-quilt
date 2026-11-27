@@ -21,3 +21,6 @@ __pycache__/
 # anything from private/ is tracked or referenced.
 private/
 *.private.*
+
+# NSE F&O daily files are large (about 1MB each); data/positioning/ keeps the derived history
+data/raw/positioning/fo_*.zip

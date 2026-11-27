@@ -162,6 +162,29 @@ def main():
             write("context", pd.DataFrame(context.rows_for_page(ctx)),
                   [{"label": "Researched context (sources in each row)", "value": json.dumps(ctx, indent=1, ensure_ascii=False)},
                    {"label": "context.py", "value": code("context.py"), "type": "code", "lang": "python"}])
+        # Positioning: gauges, clashes and implied moves from that month's facts.
+        ff = os.path.join(HERE, "data", "analysis", f"facts_{memo['month']}.json")
+        if os.path.exists(ff):
+            from positioning import value_text
+            facts = {x["id"]: x for x in json.load(open(ff))["facts"]}
+            prow, i = [], 0
+            for fid in ["pos_us", "pos_india", "pos_options"]:
+                for g in facts.get(fid, {}).get("numbers", {}).get("readings", []):
+                    prow.append(dict(kind="gauge", key=f"gauge|{g['id']}", order=i, group=g["group"], name=g["name"],
+                                     value=g["value"], value_text=value_text(g["id"], g["value"]), pctl=g["pctl"],
+                                     label=g["label"], date=g["date"], asset=g["asset"]))
+                    i += 1
+            for j, c in enumerate(facts.get("pos_clashes", {}).get("numbers", {}).get("clashes", [])):
+                prow.append(dict(kind="clash", key=f"clash|{j}", order=100 + j, text=c))
+            for j, m in enumerate(facts.get("implied_moves", {}).get("numbers", {}).get("moves", [])):
+                prow.append(dict(kind="implied", key=f"implied|{m['underlying']}|{str(m['expiry'])[:10]}", order=200 + j,
+                                 underlying=m["underlying"], as_of=str(m["as_of"])[:10], expiry=str(m["expiry"])[:10],
+                                 implied_move_pct=round(m["implied_move"] * 100, 2), pcr=round(m["pcr"], 2), days=m["days"]))
+            if prow:
+                write("positioning", pd.DataFrame(prow),
+                      [{"label": "positioning.py", "value": code("positioning.py"), "type": "code", "lang": "python"},
+                       {"label": "Sources", "value": "CFTC Commitments of Traders (publicreporting.cftc.gov); CBOE indices via Yahoo; "
+                                                     "SPY options via Yahoo; NSE F&O bhavcopy and participant-wise open interest; NSDL FPI monthly report"}])
         write("read", pd.DataFrame(rows),
               [{"label": "Facts the memo is written from", "value": open(facts_md).read() if os.path.exists(facts_md) else "missing"},
                {"label": "analysis.py", "value": code("analysis.py"), "type": "code", "lang": "python"}])

@@ -416,6 +416,284 @@
       "text": "India sectors: Nifty IT TRI led (+18.1%), Nifty Metal TRI lagged (-7.5%). US sectors: Energy (XLE) led (+13.9%), Semiconductors (SMH) lagged (-14.2%).",
       "flag": false,
       "numbers": {}
+    },
+    {
+      "question": "positioning",
+      "id": "pos_us",
+      "text": "US futures positioning: Crude oil (WTI): hedge-fund net long +1.7% of open interest (13th percentile of 3 years: Normal); Gold: hedge-fund net long +26.6% of open interest (37th percentile of 3 years: Normal); Silver: hedge-fund net long +2.9% of open interest (3rd percentile of 3 years: Most bearish in 3 years); Copper: hedge-fund net long +12.0% of open interest (40th percentile of 3 years: Normal); S&P 500 futures: leveraged-fund net -20.5% of open interest (19th percentile of 3 years: Normal); Nasdaq 100 futures: leveraged-fund net +0.9% of open interest (94th percentile of 3 years: Most bullish in 3 years); US Treasury bond futures: asset-manager net +20.3% of open interest (0th percentile of 3 years: Most bearish in 3 years); US dollar index: leveraged-fund net +6.5% of open interest (69th percentile of 3 years: Normal).",
+      "flag": true,
+      "numbers": {
+        "readings": [
+          {
+            "id": "COT_WTI",
+            "name": "Crude oil (WTI): hedge-fund net long",
+            "group": "US futures positioning",
+            "asset": "BRENT",
+            "value": 1.6502322030663528,
+            "date": "2026-10-27",
+            "pctl": 12.82051282051282,
+            "label": "Normal",
+            "n": 156
+          },
+          {
+            "id": "COT_GOLD",
+            "name": "Gold: hedge-fund net long",
+            "group": "US futures positioning",
+            "asset": "GOLD",
+            "value": 26.602656183059903,
+            "date": "2026-10-27",
+            "pctl": 36.53846153846153,
+            "label": "Normal",
+            "n": 156
+          },
+          {
+            "id": "COT_SILVER",
+            "name": "Silver: hedge-fund net long",
+            "group": "US futures positioning",
+            "asset": "SILVER",
+            "value": 2.857364100975685,
+            "date": "2026-10-27",
+            "pctl": 3.205128205128205,
+            "label": "Most bearish in 3 years",
+            "n": 156
+          },
+          {
+            "id": "COT_COPPER",
+            "name": "Copper: hedge-fund net long",
+            "group": "US futures positioning",
+            "asset": "COPPER",
+            "value": 12.039380569048037,
+            "date": "2026-10-27",
+            "pctl": 40.38461538461539,
+            "label": "Normal",
+            "n": 156
+          },
+          {
+            "id": "COT_SPX",
+            "name": "S&P 500 futures: leveraged-fund net",
+            "group": "US futures positioning",
+            "asset": "US_LARGE",
+            "value": -20.483803588567024,
+            "date": "2026-10-27",
+            "pctl": 19.230769230769234,
+            "label": "Normal",
+            "n": 156
+          },
+          {
+            "id": "COT_NDX",
+            "name": "Nasdaq 100 futures: leveraged-fund net",
+            "group": "US futures positioning",
+            "asset": "US_TECH",
+            "value": 0.8569577070329376,
+            "date": "2026-10-27",
+            "pctl": 94.23076923076923,
+            "label": "Most bullish in 3 years",
+            "n": 156
+          },
+          {
+            "id": "COT_UST",
+            "name": "US Treasury bond futures: asset-manager net",
+            "group": "US futures positioning",
+            "asset": "US_LT_TSY",
+            "value": 20.310351174885007,
+            "date": "2026-10-27",
+            "pctl": 0.0,
+            "label": "Most bearish in 3 years",
+            "n": 156
+          },
+          {
+            "id": "COT_USD",
+            "name": "US dollar index: leveraged-fund net",
+            "group": "US futures positioning",
+            "asset": null,
+            "value": 6.543314754573896,
+            "date": "2026-10-27",
+            "pctl": 69.23076923076923,
+            "label": "Normal",
+            "n": 156
+          }
+        ]
+      }
+    },
+    {
+      "question": "positioning",
+      "id": "pos_india",
+      "text": "India flows: FPI net equity investment (month, \u20b9 crore) \u20b934,843 crore net selling (22nd percentile of 3 years: Normal); FII long share of index futures 11% (22nd percentile of 3 years: Normal).",
+      "flag": false,
+      "numbers": {
+        "readings": [
+          {
+            "id": "FPI_EQ",
+            "name": "FPI net equity investment (month, \u20b9 crore)",
+            "group": "India flows",
+            "asset": "IN_LARGE",
+            "value": -34843.0,
+            "date": "2026-10-31",
+            "pctl": 22.22222222222222,
+            "label": "Normal",
+            "n": 36
+          },
+          {
+            "id": "FII_IDXFUT",
+            "name": "FII long share of index futures",
+            "group": "India flows",
+            "asset": "IN_LARGE",
+            "value": 11.122092065614432,
+            "date": "2026-10-30",
+            "pctl": 22.22222222222222,
+            "label": "Normal",
+            "n": 36
+          }
+        ]
+      }
+    },
+    {
+      "question": "positioning",
+      "id": "pos_options",
+      "text": "Options and volatility: VIX term structure (3-month \u00f7 1-month) 1.07 (22nd percentile of 3 years: Normal); CBOE SKEW (cost of crash protection) 150 (67th percentile of 3 years: Normal); MOVE (US bond volatility) 100 (66th percentile of 3 years: Normal); Nifty options put/call ratio (next monthly expiry) 1.24 (78th percentile of 3 years: Normal); Nifty implied move to next monthly expiry \u00b12.9% (52nd percentile of 3 years: Normal).",
+      "flag": false,
+      "numbers": {
+        "readings": [
+          {
+            "id": "VOL_TERM",
+            "name": "VIX term structure (3-month \u00f7 1-month)",
+            "group": "Options and volatility",
+            "asset": null,
+            "value": 1.0700309271374164,
+            "date": "2026-10-30",
+            "pctl": 22.47340425531915,
+            "label": "Normal",
+            "n": 752
+          },
+          {
+            "id": "VOL_SKEW",
+            "name": "CBOE SKEW (cost of crash protection)",
+            "group": "Options and volatility",
+            "asset": null,
+            "value": 149.75999450683594,
+            "date": "2026-10-30",
+            "pctl": 66.9836956521739,
+            "label": "Normal",
+            "n": 736
+          },
+          {
+            "id": "VOL_MOVE",
+            "name": "MOVE (US bond volatility)",
+            "group": "Options and volatility",
+            "asset": null,
+            "value": 100.1999969482422,
+            "date": "2026-10-30",
+            "pctl": 66.13119143239625,
+            "label": "Normal",
+            "n": 747
+          },
+          {
+            "id": "NIFTY_PCR",
+            "name": "Nifty options put/call ratio (next monthly expiry)",
+            "group": "Options and volatility",
+            "asset": "IN_LARGE",
+            "value": 1.2394505733062304,
+            "date": "2026-10-30",
+            "pctl": 77.77777777777779,
+            "label": "Normal",
+            "n": 27
+          },
+          {
+            "id": "NIFTY_MOVE",
+            "name": "Nifty implied move to next monthly expiry",
+            "group": "Options and volatility",
+            "asset": "IN_LARGE",
+            "value": 2.89440465707432,
+            "date": "2026-10-30",
+            "pctl": 51.85185185185185,
+            "label": "Normal",
+            "n": 27
+          }
+        ]
+      }
+    },
+    {
+      "question": "positioning",
+      "id": "pos_clashes",
+      "text": "Positioning clashes: In Nasdaq 100 futures, leveraged funds are the most bullish they have been in 3 years (94th percentile), yet it fell 6.7% this month: if they cut those positions, selling could deepen; In US Treasury bond futures, asset managers are the most bearish they have been in 3 years (0th percentile), yet it rose 5.6% this month: if they turn, their buying could add to the rise; Foreign investors sold a net \u20b934,843 crore of Indian equities while the Nifty 50 rose 2.0%: domestic buying carried the market.",
+      "flag": true,
+      "numbers": {
+        "clashes": [
+          "In Nasdaq 100 futures, leveraged funds are the most bullish they have been in 3 years (94th percentile), yet it fell 6.7% this month: if they cut those positions, selling could deepen",
+          "In US Treasury bond futures, asset managers are the most bearish they have been in 3 years (0th percentile), yet it rose 5.6% this month: if they turn, their buying could add to the rise",
+          "Foreign investors sold a net \u20b934,843 crore of Indian equities while the Nifty 50 rose 2.0%: domestic buying carried the market"
+        ]
+      }
+    },
+    {
+      "question": "positioning",
+      "id": "implied_moves",
+      "text": "Options-implied moves to the next monthly expiries: Nifty as of 2026-11-26: \u00b13.5% by 29 Dec (put/call 1.18), \u00b14.8% by 25 Jan (put/call 1.26), \u00b15.9% by 23 Feb (put/call 1.14); S&P 500 (SPY) as of 2026-11-27: \u00b14.9% by 18 Dec (put/call 1.61), \u00b16.6% by 15 Jan (put/call 2.10), \u00b18.4% by 19 Feb (put/call 6.02).",
+      "flag": false,
+      "numbers": {
+        "moves": [
+          {
+            "underlying": "NIFTY",
+            "as_of": "2026-11-26",
+            "expiry": "2026-12-29",
+            "spot": 25884.5,
+            "atm": 25900.0,
+            "implied_move": 0.0348741524850779,
+            "pcr": 1.1817374210349334,
+            "days": 33
+          },
+          {
+            "underlying": "NIFTY",
+            "as_of": "2026-11-26",
+            "expiry": "2027-01-25",
+            "spot": 25884.5,
+            "atm": 25900.0,
+            "implied_move": 0.0479321601730765,
+            "pcr": 1.2558678872105438,
+            "days": 60
+          },
+          {
+            "underlying": "NIFTY",
+            "as_of": "2026-11-26",
+            "expiry": "2027-02-23",
+            "spot": 25884.5,
+            "atm": 25900.0,
+            "implied_move": 0.0593463269524232,
+            "pcr": 1.1407390510948905,
+            "days": 89
+          },
+          {
+            "underlying": "SPY",
+            "as_of": "2026-11-27",
+            "expiry": "2026-12-18",
+            "spot": 716.7000122070312,
+            "atm": 717.0,
+            "implied_move": 0.0488140078193468,
+            "pcr": 1.614028915366276,
+            "days": 21
+          },
+          {
+            "underlying": "SPY",
+            "as_of": "2026-11-27",
+            "expiry": "2027-01-15",
+            "spot": 716.7000122070312,
+            "atm": 715.0,
+            "implied_move": 0.0663178445520524,
+            "pcr": 2.1034813667205694,
+            "days": 49
+          },
+          {
+            "underlying": "SPY",
+            "as_of": "2026-11-27",
+            "expiry": "2027-02-19",
+            "spot": 716.7000122070312,
+            "atm": 715.0,
+            "implied_move": 0.0837728463476799,
+            "pcr": 6.024455252918288,
+            "days": 84
+          }
+        ]
+      }
     }
   ]
 }

@@ -75,6 +75,18 @@
   .fq-bar i { display: block; height: 100%; }
   .fq-out .fq-num { text-align: right; }
 
+  /* Positioning */
+  .fq-clashes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .fq-clashes li { border: 1px solid color-mix(in srgb, var(--color-warn) 45%, var(--color-border-line)); background: color-mix(in srgb, var(--color-warn) 8%, var(--color-panel)); border-radius: var(--cds-radius); padding: 8px 12px; font-size: 14px; line-height: 1.45; }
+  .fq-moves { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--cds-gap-md); min-height: 90px; }
+  .fq-move { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-md); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .fq-move-row { display: grid; grid-template-columns: 1fr auto auto; gap: var(--cds-gap-md); font-size: 13.5px; font-variant-numeric: tabular-nums; align-items: baseline; }
+  .fq-move-row b { font-size: 16px; font-weight: var(--cds-font-weight-medium); }
+  .fq-pos td:nth-child(3) { min-width: 150px; }
+  .fq-track { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--color-warn) 35%, transparent) 0 10%, var(--cds-chart-grid, var(--color-border-line)) 10% 90%, color-mix(in srgb, var(--color-warn) 35%, transparent) 90% 100%); margin: 4px 0 2px; }
+  .fq-track i { position: absolute; top: -3px; width: 4px; height: 14px; border-radius: 2px; background: var(--color-fg); transform: translateX(-2px); }
+  .fq-pctl { font-size: 11px; color: var(--color-fg-muted); }
+
   /* At a glance */
   .fq-glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--cds-gap-md); }
   .fq-glance-card { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-md); min-width: 0; }
@@ -188,6 +200,22 @@
         <tbody data-draw="calendar"></tbody>
       </table>
     </div>
+  </section>
+
+  <section class="fq-section" id="positioning">
+    <div class="fq-sechead">
+      <h2>How money is positioned</h2>
+      <span class="fq-muted">Where investors have actually placed their bets, ranked against the past three years</span>
+    </div>
+    <ul class="fq-clashes" data-draw="pos-clashes" data-source="positioning"></ul>
+    <div class="fq-moves dash-skeleton" data-draw="pos-moves" data-source="positioning"></div>
+    <div class="fq-tablewrap">
+      <table class="fq-table fq-pos" data-source="positioning" data-row-key="key" aria-label="Positioning gauges">
+        <thead><tr><th data-field="name">Gauge</th><th data-field="value_text">Latest</th><th data-field="pctl">Where it sits in 3 years</th><th data-field="label">Reading</th><th data-field="date">As of</th></tr></thead>
+        <tbody data-draw="pos-gauges"></tbody>
+      </table>
+    </div>
+    <p class="fq-muted">Crowded means the top or bottom 10% of the gauge's own three-year range. Crowded positions matter most when price moves against them, because they can unwind quickly. Futures positioning is the CFTC's weekly report; India flows come from NSDL and NSE; option measures from CBOE, Yahoo and NSE.</p>
   </section>
 
   <section class="fq-section" id="macro">
@@ -419,6 +447,67 @@
       t.textContent = r.body;
       li.append(a, t); return li;
     }));
+  });
+
+  // ── Positioning ──────────────────────────────────────────────────────────
+  const posRows = (kind) => { const d = FQ.rows('positioning'); return { status: d.status, rows: d.rows.filter(r => r.kind === kind).sort((a, b) => a.order - b.order) }; };
+  const posMark = (el, field, key) => { el.dataset.source = 'positioning'; el.dataset.field = field; el.dataset.where = 'key=' + key; return el; };
+  dash.draw('pos-clashes', (el) => {
+    const d = posRows('clash');
+    el.replaceChildren(...d.rows.map(r => { const li = posMark(document.createElement('li'), 'text', r.key); li.textContent = r.text; return li; }));
+  });
+  dash.draw('pos-moves', (el) => {
+    const d = posRows('implied');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the options data');
+    FQ.done(el);
+    const by = new Map();
+    d.rows.forEach(r => { if (!by.has(r.underlying)) by.set(r.underlying, []); by.get(r.underlying).push(r); });
+    el.replaceChildren(...[...by].map(([u, rows]) => {
+      const card = document.createElement('div'); card.className = 'fq-move'; card.id = 'move-' + u;
+      const h = document.createElement('div'); h.className = 'fq-cat-h';
+      const t = document.createElement('strong'); t.textContent = (u === 'NIFTY' ? 'Nifty 50' : 'S&P 500 (SPY)') + ': move priced by options';
+      const a = document.createElement('span'); a.className = 'fq-muted'; a.textContent = 'as of ' + niceDate(rows[0].as_of);
+      h.append(t, a); card.append(h);
+      rows.forEach(r => {
+        const row = document.createElement('div'); row.className = 'fq-move-row';
+        const e = document.createElement('span'); e.textContent = 'By ' + niceDate(r.expiry) + ' (' + r.days + ' days)';
+        const m = posMark(document.createElement('b'), 'implied_move_pct', r.key); m.textContent = '±' + (+r.implied_move_pct).toFixed(1) + '%';
+        const p = document.createElement('span'); p.className = 'fq-muted';
+        const pv = posMark(document.createElement('span'), 'pcr', r.key); pv.textContent = (+r.pcr).toFixed(2);
+        p.append('put/call ', pv);
+        row.append(e, m, p); card.append(row);
+      });
+      return card;
+    }));
+  });
+  dash.draw('pos-gauges', (tb) => {
+    const d = posRows('gauge');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    let lastGroup = null; const out = [];
+    d.rows.forEach(r => {
+      if (r.group !== lastGroup) {
+        lastGroup = r.group;
+        const gr = document.createElement('tr'); const gc = document.createElement('td'); gc.colSpan = 5; gc.className = 'fq-l';
+        const b = document.createElement('b'); b.textContent = r.group; gc.append(b); gr.append(gc); out.push(gr);
+      }
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const bar = document.createElement('td');
+      if (r.pctl != null) {
+        const tr_ = document.createElement('div'); tr_.className = 'fq-track'; tr_.setAttribute('aria-label', Math.round(r.pctl) + 'th percentile');
+        const i = document.createElement('i'); i.style.left = Math.max(0, Math.min(100, r.pctl)) + '%'; tr_.append(i);
+        const lab = document.createElement('div'); lab.className = 'fq-pctl'; lab.textContent = Math.round(r.pctl) + 'th percentile';
+        bar.append(tr_, lab);
+      } else { bar.textContent = 'Building history'; bar.className = 'fq-muted'; }
+      const pill = document.createElement('span');
+      pill.className = 'fq-pill' + (r.label === 'Normal' || r.label === 'Not enough history' ? '' : ' fq-warn');
+      pill.textContent = r.label;
+      const lc = document.createElement('td'); lc.className = 'fq-l'; lc.append(pill);
+      tr.append(td(r.name, 'fq-l'), td(r.value_text, 'fq-num'), bar, lc, td(niceDate(r.date)));
+      out.push(tr);
+    });
+    tb.replaceChildren(...out);
   });
 
   // ── News context: drivers, themes, calendar ──────────────────────────────

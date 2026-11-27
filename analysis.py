@@ -46,6 +46,11 @@ def pp(x, d=1):
     return "n/a" if x is None or pd.isna(x) else f"{x*100:+.{d}f}pp"
 
 
+def ordinal(x):
+    n = int(round(x))
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
 def f(x, d=2):
     return None if x is None or pd.isna(x) else round(float(x), d)
 
@@ -253,11 +258,104 @@ def main():
           f"India sectors: {it['name']} led ({pct(it.ret_local)}), {ib['name']} lagged ({pct(ib.ret_local)}). "
           f"US sectors: {ut['name']} led ({pct(ut.ret_local)}), {ub['name']} lagged ({pct(ub.ret_local)}).")
 
+    # ── 7. Positioning: how money is placed (positioning.py) ─────────────────
+    gfile = os.path.join(HERE, "data", "positioning", "gauges.csv")
+    if os.path.exists(gfile):
+        from positioning import GAUGES
+        g = pd.read_csv(gfile, parse_dates=["date"])
+        readings = []
+        for gid, meta in GAUGES.items():
+            s = g[g.gauge == gid].set_index("date")["value"].sort_index()
+            s = s[s.index <= M]
+            if s.empty:
+                continue
+            v, d = s.iloc[-1], s.index[-1]
+            win = s[s.index > M - pd.DateOffset(years=3)]
+            pctl = float((win < v).mean() * 100) if len(win) >= 12 else None
+            lab = "Not enough history" if pctl is None else meta["high"] if pctl >= 90 else meta["low"] if pctl <= 10 else "Normal"
+            readings.append(dict(id=gid, name=meta["name"], group=meta["group"], asset=meta["asset"], value=float(v),
+                                 date=str(d.date()), pctl=pctl, label=lab, n=len(win)))
+        R = {r["id"]: r for r in readings}
+
+        def fmt(r):
+            v = r["value"]
+            val = ((f"₹{v:,.0f} crore net buying" if v >= 0 else f"₹{-v:,.0f} crore net selling") if r["id"] == "FPI_EQ" else f"{v:.2f}" if r["id"] in ("VOL_TERM", "NIFTY_PCR")
+                   else f"±{v:.1f}%" if r["id"] == "NIFTY_MOVE" else f"{v:.0f}" if r["id"] in ("VOL_SKEW", "VOL_MOVE")
+                   else f"{v:+.1f}% of open interest" if r["id"].startswith("COT") else f"{v:.0f}%")
+            where = "percentile n/a" if r["pctl"] is None else f"{ordinal(r['pctl'])} percentile of 3 years"
+            return f"{r['name']} {val} ({where}: {r['label']})"
+
+        for grp in ["US futures positioning", "India flows", "Options and volatility"]:
+            rs = [r for r in readings if r["group"] == grp]
+            if rs:
+                F.add("positioning", "pos_" + grp.split()[0].lower(), f"{grp}: " + "; ".join(fmt(r) for r in rs) + ".",
+                      flag=any(r["label"] not in ("Normal", "Not enough history") for r in rs), readings=rs)
+
+        # Clashes between positioning and price action
+        rets = cur.set_index("id")
+        clashes = []
+        for r in readings:
+            if not r["asset"] or r["pctl"] is None or r["asset"] not in rets.index or not r["id"].startswith("COT"):
+                continue
+            a = rets.loc[r["asset"]]
+            who, mkt = r["name"].split(": ")[1].replace(" net long", "").replace(" net", ""), r["name"].split(":")[0]
+            who = who.replace("hedge-fund", "hedge funds").replace("leveraged-fund", "leveraged funds").replace("asset-manager", "asset managers")
+            # Same thresholds as the labels: top or bottom 10% of three years.
+            if r["pctl"] >= 90 and (a.ret_local < -0.05 or "LAGGARD" in a["flags"]):
+                clashes.append(f"In {mkt}, {who} are the most bullish they have been in 3 years ({ordinal(r['pctl'])} percentile), "
+                               f"yet it fell {abs(a.ret_local)*100:.1f}% this month: if they cut those positions, selling could deepen")
+            if r["pctl"] <= 10 and a.ret_local > 0.05:
+                clashes.append(f"In {mkt}, {who} are the most bearish they have been in 3 years ({ordinal(r['pctl'])} percentile), "
+                               f"yet it rose {a.ret_local*100:.1f}% this month: if they turn, their buying could add to the rise")
+        fpi, nifty = R.get("FPI_EQ"), rets.loc["IN_LARGE"].ret_local if "IN_LARGE" in rets.index else None
+        if fpi and nifty is not None and fpi["date"][:7] == M.strftime("%Y-%m"):
+            if fpi["value"] < 0 and nifty > 0:
+                clashes.append(f"Foreign investors sold a net ₹{-fpi['value']:,.0f} crore of Indian equities while the Nifty 50 rose {nifty*100:.1f}%: domestic buying carried the market")
+            elif fpi["value"] > 0 and nifty < 0:
+                clashes.append(f"Foreign investors bought a net ₹{fpi['value']:,.0f} crore while the Nifty 50 fell {nifty*100:.1f}%")
+            fs = g[g.gauge == "FPI_EQ"].set_index("date")["value"].sort_index()
+            fs = fs[fs.index <= M]
+            streak = 0
+            for v in fs.iloc[::-1]:
+                if v < 0:
+                    streak += 1
+                else:
+                    break
+            if streak >= 3:
+                clashes.append(f"Foreign investors have been net sellers of Indian equities for {streak} months running")
+        fomc = cat[(cat["key"] == "FOMC_NEXT")].sort_values("prob", ascending=False).head(1)
+        ust = R.get("COT_UST")
+        if len(fomc) and "increase" in str(fomc.outcome.iloc[0]).lower() and fomc.prob.iloc[0] >= 0.8 and ust and ust["pctl"] is not None and ust["pctl"] >= 90:
+            clashes.append(f"Asset managers are the most bullish on Treasury bonds in 3 years ({ordinal(ust['pctl'])} percentile) while markets price a {fomc.prob.iloc[0]*100:.0f}% chance of a Fed hike")
+        term = R.get("VOL_TERM")
+        if term and term["value"] < 1:
+            clashes.append(f"The VIX curve is inverted ({term['value']:.2f}): near-term fear is above longer-term fear, a sign of acute stress")
+        F.add("positioning", "pos_clashes",
+              ("Positioning clashes: " + "; ".join(clashes) + ".") if clashes else "No clashes between positioning and price action.",
+              flag=bool(clashes), clashes=clashes)
+
+        # Forward-looking implied moves (latest snapshot, not month-end)
+        ifile = os.path.join(HERE, "data", "positioning", "implied.csv")
+        if os.path.exists(ifile):
+            im = pd.read_csv(ifile, parse_dates=["as_of", "expiry"])
+            parts = []
+            for u in ["NIFTY", "SPY"]:
+                x = im[im.underlying == u]
+                if len(x):
+                    x = x[x.as_of == x.as_of.max()].sort_values("expiry")
+                    parts.append(f"{'Nifty' if u == 'NIFTY' else 'S&P 500 (SPY)'} as of {x.as_of.iloc[0].date()}: "
+                                 + ", ".join(f"±{r.implied_move*100:.1f}% by {r.expiry:%d %b} (put/call {r.pcr:.2f})" for r in x.itertuples()))
+            if parts:
+                F.add("positioning", "implied_moves", "Options-implied moves to the next monthly expiries: " + "; ".join(parts) + ".",
+                      moves=im[im.as_of == im.groupby("underlying").as_of.transform("max")]       # latest snapshot per market
+                      .sort_values(["underlying", "expiry"])
+                      .assign(as_of=lambda d: d.as_of.astype(str), expiry=lambda d: d.expiry.astype(str)).to_dict("records"))
+
     facts = dict(month=M.strftime("%Y-%m"), label=label, generated_from="data/quilt/*.csv and " + os.path.basename(cat_file),
                  facts=F.items)
     key = M.strftime("%Y-%m")
     json.dump(facts, open(os.path.join(OUT, f"facts_{key}.json"), "w"), indent=2, default=str)
-    order = ["regime", "persistence", "divergence", "currency", "risks", "breadth"]
+    order = ["regime", "persistence", "divergence", "currency", "risks", "breadth", "positioning"]
     lines = [f"# Facts for {label}", ""]
     for q in order:
         lines.append(f"## {q.capitalize()}")
