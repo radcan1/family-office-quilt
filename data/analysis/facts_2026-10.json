@@ -1,0 +1,421 @@
+{
+  "month": "2026-10",
+  "label": "October 2026",
+  "generated_from": "data/quilt/*.csv and catalysts_2026-11-27.csv",
+  "facts": [
+    {
+      "question": "breadth",
+      "id": "breadth",
+      "text": "4 of 19 assets rose in rupee terms in October 2026; 3 of 18 beat INR cash (+0.45%).",
+      "flag": true,
+      "numbers": {
+        "up": 4,
+        "of": 19,
+        "beat_cash": 3,
+        "cash": 0.0045
+      }
+    },
+    {
+      "question": "breadth",
+      "id": "dispersion",
+      "text": "Best to worst spread was 36.6pp (Brent Crude (BNO) +17.7% to Silver (SLV) -18.9%). Cross-asset dispersion was 7.1% against a 12-month median of 6.4%.",
+      "flag": false,
+      "numbers": {
+        "spread": 0.3664,
+        "dispersion": 0.0714,
+        "dispersion_median_12m": 0.0637
+      }
+    },
+    {
+      "question": "regime",
+      "id": "regime",
+      "text": "Regime: Mixed (3 of 6 votes risk-on). copper/gold +5.7% over 3 months; Midcap 150/FMCG +2.6% over 3 months; high yield/Treasuries -1.8% over 3 months; equal-weight/cap-weight S&P 500 +0.5% over 3 months; cyclicals minus defensives over 3 months: US -7.5pp, India -3.7pp; US high-yield spread 3.44% (+0.59pp over 3 months).",
+      "flag": false,
+      "numbers": {
+        "regime": "Mixed",
+        "score": 3,
+        "votes": [
+          {
+            "vote": "copper/gold",
+            "risk_on": true,
+            "detail": "copper/gold +5.7% over 3 months"
+          },
+          {
+            "vote": "Midcap 150/FMCG",
+            "risk_on": true,
+            "detail": "Midcap 150/FMCG +2.6% over 3 months"
+          },
+          {
+            "vote": "high yield/Treasuries",
+            "risk_on": false,
+            "detail": "high yield/Treasuries -1.8% over 3 months"
+          },
+          {
+            "vote": "equal-weight/cap-weight S&P 500",
+            "risk_on": true,
+            "detail": "equal-weight/cap-weight S&P 500 +0.5% over 3 months"
+          },
+          {
+            "vote": "cyclical vs defensive sectors",
+            "risk_on": false,
+            "detail": "cyclicals minus defensives over 3 months: US -7.5pp, India -3.7pp"
+          },
+          {
+            "vote": "high-yield spread",
+            "risk_on": false,
+            "detail": "US high-yield spread 3.44% (+0.59pp over 3 months)"
+          }
+        ]
+      }
+    },
+    {
+      "question": "regime",
+      "id": "families",
+      "text": "Average rupee return by family: Bonds & cash +0.7%, Indian equity -2.5%, Real assets -2.9%, Global equity -4.1%, Crypto -8.2%.",
+      "flag": false,
+      "numbers": {
+        "families": {
+          "Bonds & cash": 0.0065,
+          "Indian equity": -0.025,
+          "Real assets": -0.0294,
+          "Global equity": -0.0413,
+          "Crypto": -0.0818
+        }
+      }
+    },
+    {
+      "question": "regime",
+      "id": "leaders",
+      "text": "Top three: Brent Crude (BNO) +17.7%, US 20Y+ Treasuries (TLT) +4.7%, Nifty 50 TRI +2.0%. Bottom three: Bitcoin -8.2%, Emerging Markets (EEM) -9.5%, Silver (SLV) -18.9%.",
+      "flag": false,
+      "numbers": {
+        "top": [
+          {
+            "id": "BRENT",
+            "ret_inr": 0.1770174792495398
+          },
+          {
+            "id": "US_LT_TSY",
+            "ret_inr": 0.0466246795659444
+          },
+          {
+            "id": "IN_LARGE",
+            "ret_inr": 0.0195448808698792
+          }
+        ],
+        "bottom": [
+          {
+            "id": "BTC",
+            "ret_inr": -0.0818425435254032
+          },
+          {
+            "id": "EM",
+            "ret_inr": -0.0945784618371976
+          },
+          {
+            "id": "SILVER",
+            "ret_inr": -0.1894003452469227
+          }
+        ]
+      }
+    },
+    {
+      "question": "persistence",
+      "id": "persistent",
+      "text": "Persistent leaders (top 5 on 1M and 3M): Brent Crude (BNO) (3M +41.0%), Nifty 1D Rate Index (3M +1.3%). Persistent laggards: Emerging Markets (EEM) (3M -5.2%), Silver (SLV) (3M -15.2%).",
+      "flag": false,
+      "numbers": {
+        "leaders": [
+          "BRENT",
+          "IN_CASH"
+        ],
+        "laggards": [
+          "EM",
+          "SILVER"
+        ]
+      }
+    },
+    {
+      "question": "persistence",
+      "id": "turnover",
+      "text": "2 of last month's top 5 stayed in the top 5 (Brent, INR cash). Rank correlation with last month: +0.09 (near +1 = same order, near \u22121 = reversal).",
+      "flag": false,
+      "numbers": {
+        "kept": [
+          "BRENT",
+          "IN_CASH"
+        ],
+        "rank_correlation": 0.0877
+      }
+    },
+    {
+      "question": "persistence",
+      "id": "movers",
+      "text": "Biggest climbers: US 20Y+ Treasuries (TLT) (+13 places), Nifty 50 TRI (+13 places), Russell 2000 (IWM) (+8 places). Biggest fallers: Bitcoin (-15), Nasdaq 100 (QQQ) (-13), Emerging Markets (EEM) (-11).",
+      "flag": false,
+      "numbers": {
+        "up": [
+          {
+            "id": "US_LT_TSY",
+            "rank_change": 13.0
+          },
+          {
+            "id": "IN_LARGE",
+            "rank_change": 13.0
+          },
+          {
+            "id": "US_SMALL",
+            "rank_change": 8.0
+          }
+        ],
+        "down": [
+          {
+            "id": "BTC",
+            "rank_change": -15.0
+          },
+          {
+            "id": "US_TECH",
+            "rank_change": -13.0
+          },
+          {
+            "id": "EM",
+            "rank_change": -11.0
+          }
+        ]
+      }
+    },
+    {
+      "question": "divergence",
+      "id": "eq_vs_liquidity",
+      "text": "Global equities averaged -2.2% over 3 months; Fed net liquidity -1.4% and G3 central-bank assets -1.5%. No equity-versus-liquidity divergence.",
+      "flag": false,
+      "numbers": {
+        "global_equity_3m": -0.0221,
+        "fed_netliq_3m": -0.0136,
+        "g3_3m": -0.0154
+      }
+    },
+    {
+      "question": "divergence",
+      "id": "eq_vs_credit",
+      "text": "S&P 500 3-month rupee return +0.9%; high-yield spread +0.59pp over 3 months. Equities rose while credit spreads widened sharply.",
+      "flag": true,
+      "numbers": {
+        "spy_3m": 0.0095,
+        "hy_oas_3m": 0.59
+      }
+    },
+    {
+      "question": "divergence",
+      "id": "eq_vs_vix",
+      "text": "S&P 500 -0.9% in dollars this month; VIX 19.4 (+3.1 points). No equity-versus-volatility divergence.",
+      "flag": false,
+      "numbers": {
+        "spy_1m": -0.0091,
+        "vix": 19.42,
+        "vix_1m": 3.08
+      }
+    },
+    {
+      "question": "divergence",
+      "id": "semis_vs_india_it",
+      "text": "Semiconductors (SMH) -15.0% in rupees against Nifty IT +18.1%: a gap of -33.1pp.",
+      "flag": true,
+      "numbers": {
+        "smh_inr": -0.15,
+        "nifty_it": 0.1806
+      }
+    },
+    {
+      "question": "currency",
+      "id": "rupee",
+      "text": "USD/INR 94.94: the rupee strengthened 0.9% this month and weakened 7.0% over 12 months. Rupee returns on dollar assets were -0.91pp versus their dollar returns on average this month.",
+      "flag": false,
+      "numbers": {
+        "usdinr": 94.94,
+        "usdinr_1m": -0.0093,
+        "usdinr_12m": 0.0697,
+        "avg_fx_gap": -0.0091
+      }
+    },
+    {
+      "question": "risks",
+      "id": "stretch",
+      "text": "Stretched beyond \u00b12 on trend: none. Nearing it (\u00b11.5 to 2): none.",
+      "flag": false,
+      "numbers": {
+        "stretched": [],
+        "watch": []
+      }
+    },
+    {
+      "question": "risks",
+      "id": "volatility",
+      "text": "VIX 19.4 (+3.1 on the month, +3.4 over 3 months); India VIX 15.3 (+1.8, +3.5).",
+      "flag": false,
+      "numbers": {
+        "vix": 19.42,
+        "india_vix": 15.3
+      }
+    },
+    {
+      "question": "risks",
+      "id": "catalysts_likely",
+      "text": "Most likely outcomes (prediction markets, as of 2026-11-27): Number of Fed cuts this year: 0 (0 bps) 98%; Next FOMC decision: 25 bps increase 94%; US tariff rate on China at year-end: 5\u201315% 88%; Next RBI policy decision: 25 bps increase 88% (thin market); Gold (GC) hit by end of December: \u2193 $3,500 62%; Bitcoin price hit before year-end: \u2193 55,000 46%; AI bubble burst: June 30, 2027 36%; Crude oil all-time high: March 31, 2027 14%; US recession by year-end: US recession by end of 2026? 3%.",
+      "flag": false,
+      "numbers": {
+        "as_of": "2026-11-27",
+        "outcomes": [
+          {
+            "event": "Number of Fed cuts this year",
+            "outcome": "0 (0 bps)",
+            "prob": 0.984
+          },
+          {
+            "event": "Next FOMC decision",
+            "outcome": "25 bps increase",
+            "prob": 0.935
+          },
+          {
+            "event": "US tariff rate on China at year-end",
+            "outcome": "5\u201315%",
+            "prob": 0.875
+          },
+          {
+            "event": "Next RBI policy decision",
+            "outcome": "25 bps increase",
+            "prob": 0.875
+          },
+          {
+            "event": "Gold (GC) hit by end of December",
+            "outcome": "\u2193 $3,500",
+            "prob": 0.625
+          },
+          {
+            "event": "Bitcoin price hit before year-end",
+            "outcome": "\u2193 55,000",
+            "prob": 0.455
+          },
+          {
+            "event": "AI bubble burst",
+            "outcome": "June 30, 2027",
+            "prob": 0.365
+          },
+          {
+            "event": "Crude oil all-time high",
+            "outcome": "March 31, 2027",
+            "prob": 0.135
+          },
+          {
+            "event": "US recession by year-end",
+            "outcome": "US recession by end of 2026?",
+            "prob": 0.033
+          }
+        ]
+      }
+    },
+    {
+      "question": "risks",
+      "id": "catalysts_repricing",
+      "text": "Moves of 20 points or more in 30 days: Bitcoin price hit before year-end: \u2191 95,000 26% to 1%; Bitcoin price hit before year-end: \u2193 55,000 10% to 46%; Bitcoin price hit before year-end: \u2191 90,000 44% to 3%; Gold (GC) hit by end of December: \u2193 $3,500 11% to 62%.",
+      "flag": true,
+      "numbers": {
+        "repricings": [
+          {
+            "event": "Bitcoin price hit before year-end",
+            "outcome": "\u2191 95,000",
+            "was": 0.265,
+            "now": 0.015
+          },
+          {
+            "event": "Bitcoin price hit before year-end",
+            "outcome": "\u2193 55,000",
+            "was": 0.105,
+            "now": 0.455
+          },
+          {
+            "event": "Bitcoin price hit before year-end",
+            "outcome": "\u2191 90,000",
+            "was": 0.445,
+            "now": 0.029
+          },
+          {
+            "event": "Gold (GC) hit by end of December",
+            "outcome": "\u2193 $3,500",
+            "was": 0.11,
+            "now": 0.625
+          }
+        ]
+      }
+    },
+    {
+      "question": "risks",
+      "id": "catalysts_shifts",
+      "text": "Other shifts of 10 to 20 points: Next FOMC decision: 25 bps increase 76% to 94%; Next RBI policy decision: 25 bps increase 77% to 88%; Bitcoin price hit before year-end: \u2193 50,000 8% to 27%; Crude oil all-time high: March 31, 2027 26% to 14%; AI bubble burst: June 30, 2027 22% to 36%.",
+      "flag": false,
+      "numbers": {
+        "shifts": [
+          {
+            "event": "Next FOMC decision",
+            "outcome": "25 bps increase",
+            "was": 0.765,
+            "now": 0.935
+          },
+          {
+            "event": "Next RBI policy decision",
+            "outcome": "25 bps increase",
+            "was": 0.77,
+            "now": 0.875
+          },
+          {
+            "event": "Bitcoin price hit before year-end",
+            "outcome": "\u2193 50,000",
+            "was": 0.075,
+            "now": 0.273
+          },
+          {
+            "event": "Crude oil all-time high",
+            "outcome": "March 31, 2027",
+            "was": 0.265,
+            "now": 0.135
+          },
+          {
+            "event": "AI bubble burst",
+            "outcome": "June 30, 2027",
+            "was": 0.225,
+            "now": 0.365
+          }
+        ]
+      }
+    },
+    {
+      "question": "risks",
+      "id": "venues",
+      "text": "Polymarket and Kalshi checked on 6 outcomes; all agree within 10 points.",
+      "flag": false,
+      "numbers": {
+        "checked": 6,
+        "disagree": 0
+      }
+    },
+    {
+      "question": "regime",
+      "id": "liquidity",
+      "text": "Fed net liquidity $5,746bn (-0.6% on the month, -1.4% over 3 months); Global M2 +8.5% year on year, +4.8% annualised over 3 months; RBI net liquidity \u20b932,216 crore injection as of 2026-11-25.",
+      "flag": false,
+      "numbers": {
+        "fed_netliq": 5745.732,
+        "fed_netliq_1m": -0.0064,
+        "global_m2_yoy": 0.0848,
+        "global_m2_3m_ann": 0.0478
+      }
+    },
+    {
+      "question": "regime",
+      "id": "sectors",
+      "text": "India sectors: Nifty IT TRI led (+18.1%), Nifty Metal TRI lagged (-7.5%). US sectors: Energy (XLE) led (+13.9%), Semiconductors (SMH) lagged (-14.2%).",
+      "flag": false,
+      "numbers": {}
+    }
+  ]
+}

@@ -75,6 +75,16 @@
   .fq-bar i { display: block; height: 100%; }
   .fq-out .fq-num { text-align: right; }
 
+  /* Monthly read */
+  .fq-readbox { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-lg); }
+  .fq-read-head { font-family: var(--font-anthropic-serif); font-size: 19px; line-height: 1.4; max-width: 80ch; }
+  .fq-read { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--cds-gap-lg) var(--cds-gap-xl); min-height: 160px; }
+  .fq-read article { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .fq-read article h3 { text-transform: none; letter-spacing: 0; font-size: var(--cds-font-size-body); color: var(--color-fg); }
+  .fq-read article p { font-size: 14px; line-height: 1.55; color: var(--color-fg); }
+  .fq-qs { display: flex; flex-direction: column; gap: var(--cds-gap-sm); border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
+  .fq-qs ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; max-width: 90ch; }
+
   .fq details { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
   .fq summary { cursor: pointer; font-weight: var(--cds-font-weight-medium); }
   .fq dl.fq-defs { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: var(--cds-gap-sm) var(--cds-gap-lg); margin: var(--cds-gap-md) 0 0; font-size: var(--cds-font-size-caption); }
@@ -89,6 +99,19 @@
     <p class="fq-take" id="takeaway">In <b data-draw="t-month">—</b>, <b data-draw="t-top">—</b> led the quilt at <span class="fq-num" data-draw="t-topret" data-source="layer2" data-field="ret_inr">—</span> in rupees and <b data-draw="t-bot">—</b> trailed at <span class="fq-num" data-draw="t-botret" data-source="layer2" data-field="ret_inr">—</span>. The rupee <span data-draw="t-fxdir">—</span> <span class="fq-num" data-draw="t-fx" data-source="layer1" data-field="chg_1">—</span> against the dollar that month, which <span data-draw="t-fxeff">—</span> the rupee return of every dollar asset.</p>
     <p class="fq-muted">Monthly total returns, INR base. Global assets are converted at the Fed's USD/INR rate. Rankings are diagnostics for the investment committee, not trade instructions.</p>
   </header>
+
+  <section class="fq-section fq-readbox" id="read">
+    <div class="fq-sechead">
+      <h2>This month's read: <span data-draw="read-month">—</span></h2>
+      <span class="fq-muted">Written only from computed facts. Observations for discussion, not trade instructions.</span>
+    </div>
+    <p class="fq-read-head" data-draw="read-headline" data-source="read" data-field="body">—</p>
+    <div class="fq-read dash-skeleton" data-draw="read" data-source="read"></div>
+    <div class="fq-qs" id="read-questions">
+      <h3>Questions for the committee</h3>
+      <ol data-draw="read-questions" data-source="read"></ol>
+    </div>
+  </section>
 
   <section class="fq-section" id="macro">
     <div class="fq-sechead">
@@ -254,6 +277,38 @@
   dash.draw('t-fx', tk((t, el) => { if (!t.fx) return '—'; el.dataset.where = 'key=' + t.fx.key; return (Math.abs(t.fx.chg_1) * 100).toFixed(1) + '%'; }));
   dash.draw('t-fxeff', tk(t => !t.fx ? '—' : t.fx.chg_1 > 0 ? 'added to' : 'reduced'));
   dash.draw('d-month', (el) => { const q = FQ.rows('layer2'); el.textContent = q.rows.length ? FQ.monthLong(FQ.latestDone(q.rows)) : '—'; });
+
+  // ── Monthly read ─────────────────────────────────────────────────────────
+  const readRows = () => FQ.rows('read');
+  dash.draw('read-month', (el) => {
+    const d = readRows(); const h = d.rows.find(r => r.kind === 'headline');
+    el.textContent = h ? h.title : '—';
+  });
+  dash.draw('read-headline', (el) => {
+    const d = readRows(); const h = d.rows.find(r => r.kind === 'headline');
+    if (!h) { el.textContent = '—'; return; }
+    el.dataset.where = 'order=' + h.order; el.textContent = h.body;
+  });
+  dash.draw('read', (el) => {
+    const d = readRows();
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'this month’s read');
+    FQ.done(el);
+    el.replaceChildren(...d.rows.filter(r => r.kind === 'section').sort((a, b) => a.order - b.order).map(r => {
+      const a = document.createElement('article'); a.id = 'read-' + r.order;
+      const h = document.createElement('h3'); h.textContent = r.title;
+      const p = document.createElement('p'); p.dataset.source = 'read'; p.dataset.field = 'body'; p.dataset.where = 'order=' + r.order;
+      p.textContent = r.body;
+      a.append(h, p); return a;
+    }));
+  });
+  dash.draw('read-questions', (el) => {
+    const d = readRows();
+    el.replaceChildren(...d.rows.filter(r => r.kind === 'question').sort((a, b) => a.order - b.order).map(r => {
+      const li = document.createElement('li'); li.dataset.source = 'read'; li.dataset.field = 'body'; li.dataset.where = 'order=' + r.order;
+      li.textContent = r.body; return li;
+    }));
+  });
 
   // ── Legend ───────────────────────────────────────────────────────────────
   dash.draw('legend', (el) => {

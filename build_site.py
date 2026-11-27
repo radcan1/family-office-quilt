@@ -17,7 +17,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCS = os.path.join(HERE, "docs")
-SETS = ["layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"]
+SETS = ["read", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"]
 
 TOKENS = """
 :root {
@@ -102,6 +102,25 @@ window.dash = (function () {
 """
 
 
+def privacy_guard():
+    """Stop the build if anything private could reach the public repo or site.
+
+    The repo is public. Family office holdings, weights and amounts live only
+    in private/ (git-ignored). This fails loudly if a private file is tracked,
+    or if the published files mention one.
+    """
+    import subprocess
+    tracked = subprocess.run(["git", "ls-files"], cwd=HERE, capture_output=True, text=True).stdout.splitlines()
+    bad = [f for f in tracked if f.startswith("private/") or ".private." in f]
+    if bad:
+        raise SystemExit(f"PRIVACY GUARD: private files are tracked by git: {bad}. Remove them before publishing.")
+    for root, _, files in os.walk(DOCS):
+        for f in files:
+            p = os.path.join(root, f)
+            if f.endswith((".html", ".json")) and "private/" in open(p, errors="ignore").read():
+                raise SystemExit(f"PRIVACY GUARD: {os.path.relpath(p, HERE)} references private/.")
+
+
 def main():
     page = open(os.path.join(HERE, "page", "index.html")).read()
     page = re.sub(r'<meta name="dash-[^"]+"[^>]*>\s*', "", page)        # dashboard-only markers
@@ -142,7 +161,8 @@ def main():
 </html>
 """
     open(os.path.join(DOCS, "index.html"), "w").write(html)
-    print(f"docs/index.html written ({len(html):,} bytes), data as of {as_of}")
+    privacy_guard()
+    print(f"docs/index.html written ({len(html):,} bytes), data as of {as_of}; privacy guard passed")
 
 
 if __name__ == "__main__":

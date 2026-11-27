@@ -14,3 +14,10 @@ __pycache__/
 *.pyc
 .venv/
 .DS_Store
+
+# ── PRIVATE: family office data never enters this public repo ──
+# Holdings, weights, amounts, account details and anything derived from them
+# live in private/ (or outside the repo). build_site.py refuses to publish if
+# anything from private/ is tracked or referenced.
+private/
+*.private.*

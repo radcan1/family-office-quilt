@@ -135,6 +135,20 @@ def main():
     write("quality", pd.DataFrame(rows),
           [{"label": "validate.py", "value": code("validate.py"), "type": "code", "lang": "python"}])
 
+    # Monthly read: the latest memo, written only from that month's facts file.
+    memos = sorted(glob.glob(os.path.join(HERE, "memos", "*.json")))
+    if memos:
+        memo = json.load(open(memos[-1]))
+        rows = [dict(order=0, kind="headline", month=memo["month"], title=memo["label"], body=memo["headline"])]
+        rows += [dict(order=i, kind="section", month=memo["month"], title=s["title"], body=s["body"])
+                 for i, s in enumerate(memo["sections"], start=1)]
+        rows += [dict(order=100 + i, kind="question", month=memo["month"], title="", body=q)
+                 for i, q in enumerate(memo["questions"], start=1)]
+        facts_md = os.path.join(HERE, "data", "analysis", f"facts_{memo['month']}.md")
+        write("read", pd.DataFrame(rows),
+              [{"label": "Facts the memo is written from", "value": open(facts_md).read() if os.path.exists(facts_md) else "missing"},
+               {"label": "analysis.py", "value": code("analysis.py"), "type": "code", "lang": "python"}])
+
 
 if __name__ == "__main__":
     main()
