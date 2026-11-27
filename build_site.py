@@ -17,7 +17,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCS = os.path.join(HERE, "docs")
-SETS = ["health", "read", "implications", "watch", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts"]
+SETS = ["health", "read", "implications", "watch", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer3_gl", "layer1", "catalysts"]
 
 TOKENS = """
 :root {
@@ -172,7 +172,7 @@ def main():
 <main id="dash-root">
 {page}
 <footer class="site-foot">
-  <p>Data as of {as_of}. Sources: NSE Indices (niftyindices.com), Yahoo Finance, FRED (Federal Reserve Bank of St. Louis), ECB Data Portal, Bank of Japan, People's Bank of China, Reserve Bank of India, Polymarket and Kalshi.</p>
+  <p>Data as of {as_of}. Sources: NSE Indices (niftyindices.com), Yahoo Finance, FRED (Federal Reserve Bank of St. Louis), ECB Data Portal, Bank of Japan, Deutsche Bundesbank, Japan Ministry of Finance, Bank of England, ChinaBond and Sina (via akshare), People's Bank of China, Reserve Bank of India, CFTC, NSDL, NSE, Polymarket and Kalshi.</p>
   <p>For information and discussion only. Nothing here is investment advice or a recommendation to buy or sell any security.</p>
 </footer>
 </main>

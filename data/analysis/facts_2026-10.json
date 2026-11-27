@@ -261,7 +261,7 @@
     {
       "question": "risks",
       "id": "catalysts_likely",
-      "text": "Most likely outcomes (prediction markets, as of 2026-11-27): Number of Fed cuts this year: 0 (0 bps) 98%; Next FOMC decision: 25 bps increase 94%; US tariff rate on China at year-end: 5\u201315% 88%; Next RBI policy decision: 25 bps increase 88% (thin market); Gold (GC) hit by end of December: \u2193 $3,500 62%; Bitcoin price hit before year-end: \u2193 55,000 46%; AI bubble burst: June 30, 2027 36%; Crude oil all-time high: March 31, 2027 14%; US recession by year-end: US recession by end of 2026? 3%.",
+      "text": "Most likely outcomes (prediction markets, as of 2026-11-27): Number of Fed cuts this year: 0 (0 bps) 98%; Next FOMC decision: 25 bps increase 94%; Next RBI policy decision: 25 bps increase 88% (thin market); US tariff rate on China at year-end: 5\u201315% 84%; Gold (GC) hit by end of December: \u2193 $3,500 62%; Bitcoin price hit before year-end: \u2193 55,000 46%; AI bubble burst: June 30, 2027 38%; Crude oil all-time high: March 31, 2027 14%; US recession by year-end: US recession by end of 2026? 3%.",
       "flag": false,
       "numbers": {
         "as_of": "2026-11-27",
@@ -269,22 +269,22 @@
           {
             "event": "Number of Fed cuts this year",
             "outcome": "0 (0 bps)",
-            "prob": 0.984
+            "prob": 0.985
           },
           {
             "event": "Next FOMC decision",
             "outcome": "25 bps increase",
-            "prob": 0.935
-          },
-          {
-            "event": "US tariff rate on China at year-end",
-            "outcome": "5\u201315%",
-            "prob": 0.875
+            "prob": 0.945
           },
           {
             "event": "Next RBI policy decision",
             "outcome": "25 bps increase",
-            "prob": 0.875
+            "prob": 0.88
+          },
+          {
+            "event": "US tariff rate on China at year-end",
+            "outcome": "5\u201315%",
+            "prob": 0.835
           },
           {
             "event": "Gold (GC) hit by end of December",
@@ -299,7 +299,7 @@
           {
             "event": "AI bubble burst",
             "outcome": "June 30, 2027",
-            "prob": 0.365
+            "prob": 0.38
           },
           {
             "event": "Crude oil all-time high",
@@ -317,7 +317,7 @@
     {
       "question": "risks",
       "id": "catalysts_repricing",
-      "text": "Moves of 20 points or more in 30 days: Bitcoin price hit before year-end: \u2191 95,000 26% to 1%; Bitcoin price hit before year-end: \u2193 55,000 10% to 46%; Bitcoin price hit before year-end: \u2191 90,000 44% to 3%; Gold (GC) hit by end of December: \u2193 $3,500 11% to 62%.",
+      "text": "Moves of 20 points or more in 30 days: Bitcoin price hit before year-end: \u2191 95,000 26% to 2%; Bitcoin price hit before year-end: \u2193 55,000 10% to 46%; Bitcoin price hit before year-end: \u2191 90,000 44% to 3%; Gold (GC) hit by end of December: \u2193 $3,500 11% to 62%.",
       "flag": true,
       "numbers": {
         "repricings": [
@@ -325,7 +325,7 @@
             "event": "Bitcoin price hit before year-end",
             "outcome": "\u2191 95,000",
             "was": 0.265,
-            "now": 0.015
+            "now": 0.019
           },
           {
             "event": "Bitcoin price hit before year-end",
@@ -337,7 +337,7 @@
             "event": "Bitcoin price hit before year-end",
             "outcome": "\u2191 90,000",
             "was": 0.445,
-            "now": 0.029
+            "now": 0.03
           },
           {
             "event": "Gold (GC) hit by end of December",
@@ -351,7 +351,7 @@
     {
       "question": "risks",
       "id": "catalysts_shifts",
-      "text": "Other shifts of 10 to 20 points: Next FOMC decision: 25 bps increase 76% to 94%; Next RBI policy decision: 25 bps increase 77% to 88%; Bitcoin price hit before year-end: \u2193 50,000 8% to 27%; Crude oil all-time high: March 31, 2027 26% to 14%; AI bubble burst: June 30, 2027 22% to 36%.",
+      "text": "Other shifts of 10 to 20 points: Next FOMC decision: 25 bps increase 76% to 94%; Next RBI policy decision: 25 bps increase 77% to 88%; Bitcoin price hit before year-end: \u2193 50,000 8% to 27%; Crude oil all-time high: March 31, 2027 26% to 14%; AI bubble burst: June 30, 2027 22% to 38%.",
       "flag": false,
       "numbers": {
         "shifts": [
@@ -359,19 +359,19 @@
             "event": "Next FOMC decision",
             "outcome": "25 bps increase",
             "was": 0.765,
-            "now": 0.935
+            "now": 0.945
           },
           {
             "event": "Next RBI policy decision",
             "outcome": "25 bps increase",
             "was": 0.77,
-            "now": 0.875
+            "now": 0.88
           },
           {
             "event": "Bitcoin price hit before year-end",
             "outcome": "\u2193 50,000",
             "was": 0.075,
-            "now": 0.273
+            "now": 0.274
           },
           {
             "event": "Crude oil all-time high",
@@ -383,7 +383,7 @@
             "event": "AI bubble burst",
             "outcome": "June 30, 2027",
             "was": 0.225,
-            "now": 0.365
+            "now": 0.38
           }
         ]
       }
@@ -416,6 +416,95 @@
       "text": "India sectors: Nifty IT TRI led (+18.1%), Nifty Metal TRI lagged (-7.5%). US sectors: Energy (XLE) led (+13.9%), Semiconductors (SMH) lagged (-14.2%).",
       "flag": false,
       "numbers": {}
+    },
+    {
+      "question": "global",
+      "id": "global_rank",
+      "text": "Among 12 world equity markets in rupees, India ranked 1st (Nifty 50 +2.0%; 3 months -5.3%, 8th). Best: India (Nifty 50 TRI) +2.0%, UK (EWU) +1.8%, Hong Kong (EWH) +0.9%. Worst: Korea (EWY) -17.1%, China tech (CQQQ) -16.6%, Taiwan (EWT) -11.3%. Persistent leaders: UK (EWU), Germany (EWG), US (S&P 500, SPY). Persistent laggards: China A-shares (ASHR), China tech (CQQQ).",
+      "flag": true,
+      "numbers": {
+        "india_rank": 1,
+        "of": 12,
+        "india_ret": 0.0195,
+        "india_rank_3m": 8
+      }
+    },
+    {
+      "question": "global",
+      "id": "china_vs_india",
+      "text": "China markets (tech, large caps, A-shares) averaged -9.7% in rupees against India's +2.0%, a gap of -11.7pp; over 3 months -15.9% against -5.3% (-10.6pp). China did not outperform India, so foreign selling of India this month is not explained by a rotation into China.",
+      "flag": false,
+      "numbers": {
+        "china_1m": -0.0974,
+        "china_3m": -0.1586,
+        "gap_1m": -0.1169,
+        "gap_3m": -0.1057,
+        "fpi": -34843.0
+      }
+    },
+    {
+      "question": "global",
+      "id": "yen",
+      "text": "USD/JPY 157.5 (-0.1% for the yen against the dollar this month, +1.1% over 3 months); the yen lost 1.1% against the rupee. Japan 10Y 2.82% (-0.24pp on the month, +1.15pp over 12 months). No sign of yen stress.",
+      "flag": false,
+      "numbers": {
+        "usdjpy": 157.47,
+        "yen_1m": -0.0014,
+        "jp10y": 2.817,
+        "jp10y_1m": -0.24,
+        "jp10y_12m": 1.147
+      }
+    },
+    {
+      "question": "global",
+      "id": "global_rates",
+      "text": "10-year yields this month: US 4.94% (-0.35pp), Germany 3.40% (-0.24pp), Japan 2.82% (-0.24pp), UK 5.25% (-0.12pp), China 1.65% (-0.03pp), India 7.38% (+0.32pp). 1 of 6 rose (India). India's 10Y sits 2.25pp above the US (+0.18pp on the month, -0.17pp over 12 months), on monthly averages.",
+      "flag": false,
+      "numbers": {
+        "yields": {
+          "US": 4.94,
+          "Germany": 3.4,
+          "Japan": 2.817,
+          "UK": 5.25,
+          "China": 1.65,
+          "India": 7.38
+        },
+        "changes": {
+          "US": -0.35,
+          "Germany": -0.24,
+          "Japan": -0.24,
+          "UK": -0.122,
+          "China": -0.032,
+          "India": 0.32
+        },
+        "india_us_gap": 2.249
+      }
+    },
+    {
+      "question": "global",
+      "id": "currencies",
+      "text": "Against the rupee this month: British pound +0.0%, Chinese yuan -0.2%, UAE dirham -0.9%, US dollar -0.9%, Singapore dollar -1.0%, Japanese yen -1.1%, Euro -2.5%. Over 12 months: Chinese yuan +14.4%, British pound +9.1%, Singapore dollar +9.0%, UAE dirham +7.0%, US dollar +7.0%, Japanese yen +4.7%, Euro +3.5%. 1 of 7 currencies gained on the rupee this month.",
+      "flag": false,
+      "numbers": {
+        "month": {
+          "British pound": 0.0005,
+          "Chinese yuan": -0.0017,
+          "UAE dirham": -0.0093,
+          "US dollar": -0.0093,
+          "Singapore dollar": -0.0096,
+          "Japanese yen": -0.0107,
+          "Euro": -0.0252
+        },
+        "year": {
+          "British pound": 0.0907,
+          "Chinese yuan": 0.1442,
+          "UAE dirham": 0.0697,
+          "US dollar": 0.0697,
+          "Singapore dollar": 0.0895,
+          "Japanese yen": 0.0465,
+          "Euro": 0.0347
+        }
+      }
     },
     {
       "question": "positioning",

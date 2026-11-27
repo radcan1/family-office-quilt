@@ -116,6 +116,52 @@ def basis_checks(store):
             f"last completed month Indian gold {last_m:+.2f}pp vs international; "
             f"12m range {(-g).min()*100:+.2f} to {(-g).max()*100:+.2f}pp. "
             "A move beyond ±3pp in a month usually means an import-duty change or a local-premium swing")
+    # Global markets: each country ETF should track its headline index once both
+    # are in dollars. A low correlation means a wrong ticker or a broken feed.
+    import registry
+    # HKD is pegged to USD (7.75–7.85), so Hang Seng levels need no conversion.
+    fx_to_usd = {"EUR": ("EURUSD_SP", "mul"), "GBP": ("GBPUSD", "mul"), "JPY": ("USDJPY_SP", "div"),
+                 "CNY": ("USDCNY_SP", "div"), "KRW": ("X_USDKRW_YAHOO", "div"), "TWD": ("X_USDTWD_YAHOO", "div"),
+                 "HKD": (None, None)}
+    gi = {i: ccy for i, _, _, _, ccy, _ in registry.GLOBAL_INDICES}
+    corr = []
+    for eid, name, _, _, _, idx in registry.LAYER3_GLOBAL:
+        if not idx or not {eid, idx} <= store.keys():
+            continue
+        lvl = store[idx]
+        fxid, how = fx_to_usd[gi[idx]]
+        if fxid:
+            if fxid not in store:
+                continue
+            fx = store[fxid].reindex(lvl.index, method="ffill")
+            lvl = (lvl * fx if how == "mul" else lvl / fx).dropna()
+        j = pd.concat([mret(store[eid]), mret(lvl)], axis=1, join="inner").dropna().iloc[-25:-1]
+        if len(j) >= 12:
+            corr.append((name, j.iloc[:, 0].corr(j.iloc[:, 1])))
+    # EWH holds Hong Kong-listed local companies only (MSCI Hong Kong); the Hang
+    # Seng also holds mainland Chinese giants (Tencent, Alibaba), so a looser match is expected.
+    floor = {"Hong Kong (EWH)": 0.70}
+    if corr:
+        low = [f"{n} {c:.2f}" for n, c in corr if c < floor.get(n, 0.85)]
+        add(f"Global ETFs track their headline index ({len(corr)} markets)", "WARN" if low else "PASS",
+            ("Low correlation: " + ", ".join(low) + ". " if low else "")
+            + "Monthly correlation in USD over 24 months: " + ", ".join(f"{n.split(' (')[0]} {c:.2f}" for n, c in corr))
+    # Global yields: the daily official feeds should match the OECD monthly averages.
+    gaps = []
+    # The OECD reports Germany and the UK as monthly averages, Japan as month-end.
+    for d, x, label, how in [("DE10Y", "X_DE10Y_OECD", "Germany", "mean"), ("JP10Y", "X_JP10Y_OECD", "Japan", "last"),
+                             ("UK10Y", "X_UK10Y_OECD", "UK", "mean")]:
+        if {d, x} <= store.keys():
+            avg = store[d].resample("ME").agg(how)
+            oecd = store[x].copy()
+            oecd.index = oecd.index + pd.offsets.MonthEnd(0)
+            j = pd.concat([avg, oecd], axis=1, join="inner").dropna().iloc[-6:]
+            if len(j):
+                gaps.append((label, (j.iloc[:, 0] - j.iloc[:, 1]).abs().max(), j.index[-1]))
+    if gaps:
+        bad = [g for g in gaps if g[1] > 0.15]
+        add("Global 10Y yields: daily feeds vs OECD monthly figures", "WARN" if bad else "PASS",
+            ", ".join(f"{l} max gap {g:.2f}pp (to {m:%b %Y})" for l, g, m in gaps) + " over the last 6 months (limit 0.15pp)")
     return res
 
 

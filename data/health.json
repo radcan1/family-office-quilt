@@ -1,8 +1,8 @@
 {
-  "run_at": "2026-11-27T10:53:26",
+  "run_at": "2026-11-27T12:55:10",
   "as_of": "2026-11-27",
   "summary": {
-    "PASS": 31,
+    "PASS": 34,
     "WARN": 2,
     "FAIL": 0
   },
@@ -23,9 +23,9 @@
     },
     {
       "area": "Market data",
-      "check": "All 80 series",
+      "check": "All 122 series",
       "status": "PASS",
-      "detail": "78 pass, 2 warn, 0 fail (freshness, completeness, impossible values, one-day jumps)",
+      "detail": "120 pass, 2 warn, 0 fail (freshness, completeness, impossible values, one-day jumps)",
       "as_of": null
     },
     {
@@ -82,6 +82,20 @@
       "check": "Indian gold premium vs international (note only)",
       "status": "PASS",
       "detail": "last completed month Indian gold +2.22pp vs international; 12m range -7.23 to +5.68pp. A move beyond \u00b13pp in a month usually means an import-duty change or a local-premium swing",
+      "as_of": null
+    },
+    {
+      "area": "Accuracy",
+      "check": "Global ETFs track their headline index (9 markets)",
+      "status": "PASS",
+      "detail": "Monthly correlation in USD over 24 months: China large caps 0.95, China A-shares 0.98, Hong Kong 0.78, Japan 0.86, Korea 0.98, Taiwan 0.95, Germany 0.99, Euro area 0.99, UK 0.97",
+      "as_of": null
+    },
+    {
+      "area": "Accuracy",
+      "check": "Global 10Y yields: daily feeds vs OECD monthly figures",
+      "status": "PASS",
+      "detail": "Germany max gap 0.08pp (to Oct 2026), Japan max gap 0.06pp (to Oct 2026), UK max gap 0.00pp (to Oct 2026) over the last 6 months (limit 0.15pp)",
       "as_of": null
     },
     {
@@ -144,14 +158,14 @@
       "area": "Memo",
       "check": "Monthly read: every number traces to the evidence",
       "status": "PASS",
-      "detail": "81 distinct numbers checked",
+      "detail": "93 distinct numbers checked",
       "as_of": null
     },
     {
       "area": "Memo",
       "check": "What this means for us: every number traces to the evidence",
       "status": "PASS",
-      "detail": "47 distinct numbers checked",
+      "detail": "52 distinct numbers checked",
       "as_of": null
     },
     {
@@ -179,7 +193,7 @@
       "area": "Page data",
       "check": "read.json",
       "status": "PASS",
-      "detail": "31 rows",
+      "detail": "33 rows",
       "as_of": null
     },
     {
@@ -219,23 +233,30 @@
     },
     {
       "area": "Page data",
+      "check": "layer3_gl.json",
+      "status": "PASS",
+      "detail": "156 rows",
+      "as_of": null
+    },
+    {
+      "area": "Page data",
       "check": "layer1.json",
       "status": "PASS",
-      "detail": "222 rows",
+      "detail": "456 rows",
       "as_of": null
     },
     {
       "area": "Page data",
       "check": "catalysts.json",
       "status": "PASS",
-      "detail": "30 rows",
+      "detail": "29 rows",
       "as_of": null
     },
     {
       "area": "Page data",
       "check": "quality.json",
       "status": "PASS",
-      "detail": "11 rows",
+      "detail": "13 rows",
       "as_of": null
     }
   ]

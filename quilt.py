@@ -8,6 +8,8 @@ Outputs (data/quilt/):
                  3-month return and rank, rank change, volatility, trend stretch
   layer3_in.csv  10 Indian sectors (INR)
   layer3_us.csv  12 US sectors (USD) + the SMH-vs-Nifty IT spread in INR
+  layer3_gl.csv  10 world markets (country ETFs) + India and the US, ranked in INR,
+                 with each headline index's return in its own currency
   layer1.csv     macro / liquidity / rates / FX / vol / ratio indicators
   summary.json   the latest month's facts the IC memo is written from
 
@@ -122,7 +124,9 @@ def layer1(months):
         "FED_ASSETS", "FED_TGA", "FED_RRP", "ECB_ASSETS", "BOJ_ASSETS", "EURUSD", "USDJPY",
         "M2_US", "M2_EA", "M2_JP", "M2_CN", "USDCNY", "US10Y", "US2Y", "US_HY_OAS", "IN10Y", "IN3M",
         "RBI_NETLIQ", "USDINR", "DXY", "VIX", "INDIAVIX", "COPPER_FUT", "GOLD_FUT",
-        "HYG_PX", "TLT_PX", "RSP_PX", "SPY_PX", "IN_MID", "IN_FMCG"]}
+        "HYG_PX", "TLT_PX", "RSP_PX", "SPY_PX", "IN_MID", "IN_FMCG",
+        "DE10Y", "JP10Y", "UK10Y", "CN10Y", "BWX_TR", "EMB_TR",
+        "GBPUSD", "EURUSD_SP", "USDJPY_SP", "USDCNY_SP", "USDSGD"]}
 
     # Fed net liquidity on the Fed's weekly (Wednesday) dates.
     w = S["FED_ASSETS"].index
@@ -139,6 +143,31 @@ def layer1(months):
                      for m in m2_months], index=pd.DatetimeIndex(m2_months))
     us_curve = (S["US10Y"] - S["US2Y"].reindex(S["US10Y"].index)).dropna()
     in_curve = (S["IN10Y"] - S["IN3M"].reindex(S["IN10Y"].index)).dropna()
+
+    # Currencies against the rupee: rupees per unit of each currency, every
+    # cross built on the USD/INR series used everywhere else. Up = that currency
+    # strengthened against the rupee (good for a rupee investor holding it).
+    inr = S["USDINR"]
+    def cross(x, how, mult=1.0):
+        f = S[x].reindex(inr.index, method="ffill")
+        return ((inr * f) if how == "mul" else (inr / f) * mult).dropna()
+    fx_inr = [
+        ("FX_USD", "US dollar", inr, "₹ per USD"),
+        ("FX_EUR", "Euro", cross("EURUSD_SP", "mul"), "₹ per EUR"),
+        ("FX_GBP", "British pound", cross("GBPUSD", "mul"), "₹ per GBP"),
+        ("FX_JPY", "Japanese yen (per 100)", cross("USDJPY_SP", "div", 100), "₹ per 100 JPY"),
+        ("FX_CNY", "Chinese yuan", cross("USDCNY_SP", "div"), "₹ per CNY"),
+        ("FX_SGD", "Singapore dollar", cross("USDSGD", "div"), "₹ per SGD"),
+        ("FX_AED", "UAE dirham", inr / registry.AED_PER_USD, "₹ per AED"),
+    ]
+    # Global 10Y yields and the gaps that matter for an Indian investor.
+    us_m = S["US10Y"].resample("ME").mean()
+    in_m = S["IN10Y"].copy()
+    in_m.index = in_m.index + pd.offsets.MonthEnd(0)
+    in_us = (in_m - us_m.reindex(in_m.index)).dropna()
+    us_de = (S["US10Y"] - S["DE10Y"].reindex(S["US10Y"].index, method="ffill")).dropna()
+    def inr_tr(x):
+        return (S[x] * inr.reindex(S[x].index, method="ffill")).dropna()
 
     def ratio(a, b):
         j = pd.concat([S[a], S[b]], axis=1, join="inner").dropna()
@@ -161,6 +190,8 @@ def layer1(months):
         ("US_HY_OAS", "Rates", "US high-yield spread", S["US_HY_OAS"], "%", "diff", ""),
         ("USDINR", "FX & volatility", "USD/INR", S["USDINR"], "INR", "pct", "Up = rupee weaker"),
         ("DXY", "FX & volatility", "US Dollar Index", S["DXY"], "index", "pct", ""),
+        ("USDJPY", "FX & volatility", "USD/JPY", S["USDJPY_SP"], "index", "pct",
+         "Yen per dollar. A sharp fall is a yen surge, which can force selling of assets bought with cheap yen loans"),
         ("VIX", "FX & volatility", "CBOE VIX", S["VIX"], "index", "diff", ""),
         ("INDIAVIX", "FX & volatility", "India VIX", S["INDIAVIX"], "index", "diff", ""),
         ("CU_AU", "Regime ratios", "Copper / Gold", ratio("COPPER_FUT", "GOLD_FUT") * 1000, "×1000", "pct",
@@ -172,6 +203,23 @@ def layer1(months):
         ("RSP_SPY", "Regime ratios", "Equal-weight / cap-weight S&P", ratio("RSP_PX", "SPY_PX"), "ratio", "pct",
          "Rising = broader US market"),
     ]
+    for key, label, s, units in fx_inr:
+        ind.append((key, "Currencies vs rupee", label, s, units, "pct", "Up = stronger against the rupee"))
+    ind += [
+        ("GL_US10Y", "Global rates", "US 10Y", S["US10Y"], "%", "diff", "US Treasury (FRED)"),
+        ("GL_DE10Y", "Global rates", "Germany 10Y", S["DE10Y"], "%", "diff", "Bund (Bundesbank)"),
+        ("GL_JP10Y", "Global rates", "Japan 10Y", S["JP10Y"], "%", "diff", "JGB (Ministry of Finance)"),
+        ("GL_UK10Y", "Global rates", "UK 10Y", S["UK10Y"], "%", "diff", "Gilt (Bank of England)"),
+        ("GL_CN10Y", "Global rates", "China 10Y", S["CN10Y"], "%", "diff", "ChinaBond"),
+        ("GL_IN10Y", "Global rates", "India 10Y", S["IN10Y"], "%", "diff", "Monthly average (no free daily feed)"),
+        ("GL_IN_US", "Global rates", "India − US 10Y gap", in_us, "pp", "diff",
+         "Monthly averages. Narrower = Indian bonds less attractive to foreign investors and hedging dollars costs less"),
+        ("GL_US_DE", "Global rates", "US − Germany 10Y gap", us_de, "pp", "diff", "Wider usually supports the dollar"),
+        ("GL_BWX", "Global rates", "International govt bonds (BWX), in INR", inr_tr("BWX_TR"), "ret", "ret",
+         "Non-US government bonds, unhedged, total return in rupees"),
+        ("GL_EMB", "Global rates", "EM dollar bonds (EMB), in INR", inr_tr("EMB_TR"), "ret", "ret",
+         "Emerging-market government bonds in USD, total return in rupees"),
+    ]
     rows = []
     for key, grp, label, s, units, how, note in ind:
         s = s.dropna()
@@ -182,16 +230,21 @@ def layer1(months):
             v1, _ = at(s, m - pd.offsets.MonthEnd(1))
             v3, _ = at(s, m - pd.offsets.MonthEnd(3))
             v12, _ = at(s, m - pd.offsets.MonthEnd(12))
-            if how == "pct":
-                c1, c3 = v / v1 - 1, v / v3 - 1
+            c12 = np.nan
+            if how == "ret":
+                # Total-return series: the card shows returns, not the index level.
+                c1, c3, c12 = v / v1 - 1, v / v3 - 1, v / v12 - 1
+                v = c1
+            elif how == "pct":
+                c1, c3, c12 = v / v1 - 1, v / v3 - 1, v / v12 - 1
             elif how == "yoy":
                 c1, c3 = v / v12 - 1, (v / v3) ** 4 - 1          # YoY, and 3M annualised
             elif how == "diff":
-                c1, c3 = v - v1, v - v3
+                c1, c3, c12 = v - v1, v - v3, v - v12
             else:
                 c1 = c3 = np.nan
             rows.append(dict(month=m, key=key, group=grp, label=label, value=v, obs_date=d,
-                             units=units, change_type=how, chg_1=c1, chg_3=c3, note=note))
+                             units=units, change_type=how, chg_1=c1, chg_3=c3, chg_12=c12, note=note))
     return pd.DataFrame(rows)
 
 
@@ -210,6 +263,26 @@ def main():
     us_names = {i: n for i, n, *_ in registry.LAYER3_US}
     l3u = add_ranks(build_panel(list(us_names), us_names, set(us_names), fx_me), "ret_local")
 
+    # World markets, ranked in INR with India and the US alongside.
+    gl_names = {i: n for i, n, *_ in registry.LAYER3_GLOBAL}
+    gl_names.update({i: n for i, n, _ in registry.GLOBAL_REFERENCE})
+    l3g = add_ranks(build_panel(list(gl_names), gl_names, set(gl_names) - {"IN_LARGE"}, fx_me), "ret_inr")
+    region = {i: r for i, _, _, _, r, _ in registry.LAYER3_GLOBAL}
+    region.update({i: r for i, _, r in registry.GLOBAL_REFERENCE})
+    head = {i: x for i, _, _, _, _, x in registry.LAYER3_GLOBAL if x}
+    gi = {i: (n, c, b) for i, n, _, _, c, b in registry.GLOBAL_INDICES}
+    l3g["region"] = l3g["id"].map(region)
+    l3g["idx_name"] = l3g["id"].map(lambda i: gi[head[i]][0] if i in head else ("Nifty 50 TRI" if i == "IN_LARGE" else None))
+    l3g["idx_ccy"] = l3g["id"].map(lambda i: gi[head[i]][1] if i in head else ("INR" if i == "IN_LARGE" else None))
+    l3g["idx_basis"] = l3g["id"].map(lambda i: gi[head[i]][2] if i in head else ("total_return" if i == "IN_LARGE" else None))
+    idx_ret = {}
+    for eid, x in head.items():
+        r = month_end(load(x)).pct_change()
+        for mth, v in r.items():
+            idx_ret[(eid, mth)] = v
+    l3g["idx_ret"] = [idx_ret.get((i, pd.Timestamp(m)), r if i == "IN_LARGE" else np.nan)
+                      for i, m, r in zip(l3g["id"], l3g["month"], l3g["ret_local"])]
+
     # Cross-market spread in ONE currency: SMH in INR minus Nifty IT (INR).
     smh = l3u[l3u.id == "US_SMH"].set_index("month")["ret_inr"]
     nit = l3i[l3i.id == "IN_IT"].set_index("month")["ret_local"]
@@ -218,7 +291,7 @@ def main():
     months = sorted(l2["month"].unique())
     l1 = layer1([pd.Timestamp(m) for m in months])
 
-    for df, name in [(l2, "layer2"), (l3i, "layer3_in"), (l3u, "layer3_us"), (l1, "layer1")]:
+    for df, name in [(l2, "layer2"), (l3i, "layer3_in"), (l3u, "layer3_us"), (l3g, "layer3_gl"), (l1, "layer1")]:
         df["mtd"] = pd.to_datetime(df["month"]) > today
         df.to_csv(os.path.join(OUT, f"{name}.csv"), index=False)
     spread.to_csv(os.path.join(OUT, "spread_smh_vs_nifty_it.csv"))

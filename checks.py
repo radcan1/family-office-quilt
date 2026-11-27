@@ -203,6 +203,7 @@ def memo_audit(H, today):
              os.path.join(D, "analysis", f"changes_{m}.json"), os.path.join(D, "analysis", f"watch_{m}.json"),
              os.path.join(HERE, "memos", f"{m}_context.json"), os.path.join(HERE, "watchlist.json"),
              os.path.join(EXPORT, "context.json"), os.path.join(EXPORT, "quality.json")]
+    paths += sorted(glob.glob(os.path.join(D, "analysis", f"watch_{m}_*.json")))     # dated watchlist readings
     evidence = "".join(open(p, encoding="utf-8").read() for p in paths if os.path.exists(p))
     have = _numbers(evidence)
     # Values written to fewer decimals than the facts are fine: also accept rounded forms.
@@ -235,8 +236,10 @@ def memo_audit(H, today):
 
 # ── 7. Page data ────────────────────────────────────────────────────────────
 def page_data(H):
-    expect = {"layer2": 19 * 13, "layer3_in": 10 * 13, "layer3_us": 12 * 13}
-    for name in ["read", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"]:
+    expect = {"layer2": len(registry.LAYER2) * 13, "layer3_in": len(registry.LAYER3_INDIA) * 13,
+              "layer3_us": len(registry.LAYER3_US) * 13,
+              "layer3_gl": (len(registry.LAYER3_GLOBAL) + len(registry.GLOBAL_REFERENCE)) * 13}
+    for name in ["read", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer3_gl", "layer1", "catalysts", "quality"]:
         p = os.path.join(EXPORT, f"{name}.json")
         if not os.path.exists(p):
             H.add("Page data", f"{name}.json", "FAIL", "missing: run export.py")

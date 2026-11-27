@@ -6,7 +6,7 @@
   "implications": [
     {
       "area": "Rupee and global allocation",
-      "data": "The rupee weakened 7.0% against the dollar over 12 months, which lifted the rupee value of every dollar asset, but it strengthened 0.9% in October and USD/INR stands at ₹92.79, against 95.83 at the end of September.",
+      "data": "The rupee weakened 7.0% against the dollar over 12 months, which lifted the rupee value of every dollar asset, but it strengthened 0.9% in October and USD/INR stands at ₹92.82, against 95.83 at the end of September.",
       "why": "For an INR-based family, currency is often the biggest single driver of global returns. A stronger rupee trims the rupee value of existing overseas holdings but makes new overseas investment cheaper. Hedging dollar exposure back to rupees costs roughly the gap between Indian and US interest rates, so it is not free."
     },
     {
@@ -21,12 +21,12 @@
     },
     {
       "area": "Oil and inflation",
-      "data": "Iran-war fears drove Brent up 17.7% in rupees in October and past $110 mid-month; it has since fallen to $92.3. Indian energy stocks fell 4.6% even as oil rallied.",
+      "data": "Iran-war fears drove Brent up 17.7% in rupees in October and past $110 mid-month; it has since fallen to $92.7. Indian energy stocks fell 4.6% even as oil rallied.",
       "why": "India imports most of its oil, so crude feeds inflation, the trade deficit and the rupee, and it shapes how far the RBI has to go. Oil has eased in November, which helps, but the Middle East remains an active risk."
     },
     {
       "area": "Global tech and AI",
-      "data": "Semiconductors fell 15.0% in rupees while Nifty IT rose 18.1%. Leveraged funds are the most bullish on Nasdaq 100 futures in three years (94th percentile) even though the index fell 6.7%, and markets put a 36% chance on an AI bubble bursting by June 2027.",
+      "data": "Semiconductors fell 15.0% in rupees while Nifty IT rose 18.1%. Leveraged funds are the most bullish on Nasdaq 100 futures in three years (94th percentile) even though the index fell 6.7%, and markets put a 38% chance on an AI bubble bursting by June 2027.",
       "why": "Many global portfolios are concentrated in US mega-cap tech without meaning to be. Crowded bullish positioning in a falling market can turn a correction into a sharper fall. Indian IT services are a different, less crowded way into the same AI theme."
     },
     {
@@ -38,6 +38,11 @@
       "area": "US rates and the Fed",
       "data": "Markets price a 94% chance of a 25bp Fed hike on 9 December and no cuts this year. US long Treasuries still rose 5.6% in dollars in October on safe-haven buying, while asset managers hold their smallest Treasury bond long in three years (0th percentile).",
       "why": "Another Fed hike tends to lift the dollar, pressure emerging markets including India, and hurt long-duration US bonds. With bond positioning already light, a turn in sentiment could move Treasuries sharply either way."
+    },
+    {
+      "area": "Global markets, China and the yen",
+      "data": "India was the best of 12 world equity markets in rupees in October (+2.0%), while China markets averaged −9.7% and Asian tech fell hardest (Korea −17.1%, Taiwan −11.3%). Yields fell in five of six major bond markets but rose in India, leaving India's 10-year 2.25pp above the US. Japan's 10-year yield is up 1.15pp over 12 months.",
+      "why": "China and India compete for the same emerging-market money, so a strong China rally is a risk to foreign flows into India; October's selling was not that. A sudden yen surge has in the past forced selling across global markets, India included. The India–US yield gap is roughly what foreign bond investors earn for holding rupees, and roughly the cost of hedging dollars back to rupees."
     }
   ],
   "actions": [
@@ -48,7 +53,7 @@
     },
     {
       "title": "Use the stronger rupee for planned overseas investment",
-      "consider": "With USD/INR at ₹92.79 against 95.83 at the end of September, consider whether planned overseas remittances under the LRS limit should go ahead now rather than wait, and whether any part of the dollar exposure is worth hedging given the cost.",
+      "consider": "With USD/INR at ₹92.82 against 95.83 at the end of September, consider whether planned overseas remittances under the LRS limit should go ahead now rather than wait, and whether any part of the dollar exposure is worth hedging given the cost.",
       "revisit": "If USD/INR moves above 96 or below 91."
     },
     {
@@ -70,6 +75,11 @@
       "title": "Decide how gold is held",
       "consider": "Consider whether gold exposure should sit in Indian instruments or international ones, given the local premium can swing several points in a month.",
       "revisit": "If the Indian premium moves by more than 3pp in a month."
+    },
+    {
+      "title": "Watch for a China rotation and yen stress",
+      "consider": "Keep the China-versus-India gap and the yen on the watchlist. If China starts to beat India by a wide margin, or the yen surges, foreign selling of Indian large caps tends to follow; consider agreeing in advance how the committee would respond rather than deciding in the moment.",
+      "revisit": "If China large caps beat the Nifty 50 by 10pp over 3 months, the yen gains 4% in a month, or Japan's 10-year yield passes 3%."
     },
     {
       "title": "Plan around the 4–9 December decisions",

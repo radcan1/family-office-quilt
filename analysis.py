@@ -69,7 +69,8 @@ def main():
     l3i = pd.read_csv(os.path.join(Q, "layer3_in.csv"), parse_dates=["month"])
     l3u = pd.read_csv(os.path.join(Q, "layer3_us.csv"), parse_dates=["month"])
     l1 = pd.read_csv(os.path.join(Q, "layer1.csv"), parse_dates=["month"])
-    for df in (l2, l3i, l3u):
+    l3g = pd.read_csv(os.path.join(Q, "layer3_gl.csv"), parse_dates=["month"])
+    for df in (l2, l3i, l3u, l3g):
         df["flags"] = df["flags"].fillna("")
 
     done = sorted(l2.loc[~l2["mtd"], "month"].unique())
@@ -258,6 +259,72 @@ def main():
           f"India sectors: {it['name']} led ({pct(it.ret_local)}), {ib['name']} lagged ({pct(ib.ret_local)}). "
           f"US sectors: {ut['name']} led ({pct(ut.ret_local)}), {ub['name']} lagged ({pct(ub.ret_local)}).")
 
+    # ── 8. Global markets: India against the world, China, yen, rates ───────
+    g = l3g[l3g.month == M].sort_values("rank")
+    if len(g):
+        ng = len(g)
+        ind_row = g[g.id == "IN_LARGE"].iloc[0]
+        lead_g = g[g["flags"].str.contains("LEADER")]
+        lag_g = g[g["flags"].str.contains("LAGGARD")]
+        F.add("global", "global_rank",
+              f"Among {ng} world equity markets in rupees, India ranked {ordinal(ind_row['rank'])} (Nifty 50 {pct(ind_row.ret_inr)}; "
+              f"3 months {pct(ind_row.ret_3m)}, {ordinal(ind_row.rank_3m)}). Best: " +
+              ", ".join(f"{r['name']} {pct(r.ret_inr)}" for _, r in g.head(3).iterrows()) + ". Worst: " +
+              ", ".join(f"{r['name']} {pct(r.ret_inr)}" for _, r in g.tail(3).iloc[::-1].iterrows()) + "."
+              + (f" Persistent leaders: {', '.join(lead_g['name'])}." if len(lead_g) else "")
+              + (f" Persistent laggards: {', '.join(lag_g['name'])}." if len(lag_g) else ""),
+              flag=ind_row["rank"] <= 2 or ind_row["rank"] >= ng - 1, india_rank=int(ind_row["rank"]), of=ng,
+              india_ret=ind_row.ret_inr, india_rank_3m=int(ind_row.rank_3m) if pd.notna(ind_row.rank_3m) else None)
+        cn = g[g.region == "China"]
+        cn1, cn3 = cn.ret_inr.mean(), cn.ret_3m.mean()
+        gap1, gap3 = cn1 - ind_row.ret_inr, cn3 - ind_row.ret_3m
+        fpi_m = None
+        gf = os.path.join(HERE, "data", "positioning", "gauges.csv")
+        if os.path.exists(gf):
+            gg = pd.read_csv(gf, parse_dates=["date"])
+            fs = gg[(gg.gauge == "FPI_EQ") & (gg.date.dt.strftime("%Y-%m") == M.strftime("%Y-%m"))]
+            fpi_m = float(fs.value.iloc[-1]) if len(fs) else None
+        rotation = gap1 >= 0.05 and fpi_m is not None and fpi_m < 0
+        F.add("global", "china_vs_india",
+              f"China markets (tech, large caps, A-shares) averaged {pct(cn1)} in rupees against India's {pct(ind_row.ret_inr)}, a gap of {pp(gap1)}; "
+              f"over 3 months {pct(cn3)} against {pct(ind_row.ret_3m)} ({pp(gap3)}). "
+              + ("China outperformed while foreigners sold India: consistent with money rotating from India to China." if rotation else
+                 "China did not outperform India, so foreign selling of India this month is not explained by a rotation into China." if gap1 < 0 and fpi_m is not None and fpi_m < 0 else
+                 "No sign of a rotation between India and China."),
+              flag=rotation, china_1m=cn1, china_3m=cn3, gap_1m=gap1, gap_3m=gap3, fpi=fpi_m)
+    jpy, jp10 = ind("USDJPY"), ind("GL_JP10Y")
+    fxj = ind("FX_JPY")
+    if jpy is not None and jp10 is not None:
+        surge = jpy.chg_1 <= -0.03 or jp10.chg_1 >= 0.20
+        F.add("global", "yen",
+              f"USD/JPY {jpy.value:.1f} ({pct(-jpy.chg_1)} for the yen against the dollar this month, {pct(-jpy.chg_3)} over 3 months); "
+              f"the yen {'gained' if fxj.chg_1 > 0 else 'lost'} {abs(fxj.chg_1)*100:.1f}% against the rupee. Japan 10Y {jp10.value:.2f}% "
+              f"({jp10.chg_1:+.2f}pp on the month, {jp10.chg_12:+.2f}pp over 12 months). "
+              + ("A yen surge or a sharp jump in Japanese yields: the conditions for a carry-trade unwind." if surge else "No sign of yen stress."),
+              flag=surge, usdjpy=jpy.value, yen_1m=-jpy.chg_1, jp10y=jp10.value, jp10y_1m=jp10.chg_1, jp10y_12m=jp10.chg_12)
+    rk = [("GL_US10Y", "US"), ("GL_DE10Y", "Germany"), ("GL_JP10Y", "Japan"), ("GL_UK10Y", "UK"), ("GL_CN10Y", "China"), ("GL_IN10Y", "India")]
+    rr = [(nm, ind(k)) for k, nm in rk if ind(k) is not None]
+    if rr:
+        rose = [nm for nm, r in rr if r.chg_1 > 0]
+        inus = ind("GL_IN_US")
+        F.add("global", "global_rates",
+              "10-year yields this month: " + ", ".join(f"{nm} {r.value:.2f}% ({r.chg_1:+.2f}pp)" for nm, r in rr) +
+              f". {len(rose)} of {len(rr)} rose" + (f" ({', '.join(rose)})" if rose and len(rose) < len(rr) else "") + ". "
+              + (f"India's 10Y sits {inus.value:.2f}pp above the US ({inus.chg_1:+.2f}pp on the month, {inus.chg_12:+.2f}pp over 12 months), on monthly averages." if inus is not None else ""),
+              flag=len(rose) in (0, len(rr)) or (inus is not None and inus.value < 2.0),
+              yields={nm: f(r.value, 3) for nm, r in rr}, changes={nm: f(r.chg_1, 3) for nm, r in rr},
+              india_us_gap=inus.value if inus is not None else None)
+    fxr = l1[(l1.month == M) & (l1.group == "Currencies vs rupee")].sort_values("chg_1", ascending=False)
+    if len(fxr):
+        lab = lambda r: r.label.replace(" (per 100)", "")
+        stronger = fxr[fxr.chg_1 > 0]
+        F.add("global", "currencies",
+              f"Against the rupee this month: " + ", ".join(f"{lab(r)} {pct(r.chg_1)}" for r in fxr.itertuples()) +
+              f". Over 12 months: " + ", ".join(f"{lab(r)} {pct(r.chg_12)}" for r in fxr.sort_values("chg_12", ascending=False).itertuples()) +
+              f". {len(stronger)} of {len(fxr)} currencies gained on the rupee this month.",
+              flag=(fxr.chg_1.abs() >= 0.03).any(), month={lab(r): f(r.chg_1, 4) for r in fxr.itertuples()},
+              year={lab(r): f(r.chg_12, 4) for r in fxr.itertuples()})
+
     # ── 7. Positioning: how money is placed (positioning.py) ─────────────────
     gfile = os.path.join(HERE, "data", "positioning", "gauges.csv")
     if os.path.exists(gfile):
@@ -355,7 +422,7 @@ def main():
                  facts=F.items)
     key = M.strftime("%Y-%m")
     json.dump(facts, open(os.path.join(OUT, f"facts_{key}.json"), "w"), indent=2, default=str)
-    order = ["regime", "persistence", "divergence", "currency", "risks", "breadth", "positioning"]
+    order = ["regime", "persistence", "divergence", "currency", "global", "risks", "breadth", "positioning"]
     lines = [f"# Facts for {label}", ""]
     for q in order:
         lines.append(f"## {q.capitalize()}")

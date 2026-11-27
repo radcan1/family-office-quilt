@@ -10,6 +10,8 @@ Providers (all keyless, all tested live 2026-11-27):
   boj                  Bank of Japan Time-Series API
   akshare_cn_m2        PBoC money supply via akshare
   rbi_mmo              RBI daily Money Market Operations press release
+  bbk / mof_jgb / boe  Bundesbank, Japan MoF and Bank of England daily 10Y yields
+  akshare_cn_yield     ChinaBond yields; akshare_index: CSI 300 (Sina)
 
 Caching: series that are never revised (NSE indices, RBI releases) are cached
 and fetched incrementally. Yahoo's adjusted close is re-based on every
@@ -175,10 +177,73 @@ def boj(key):
     return _save_cache("boj", key, s)
 
 
+# ── Government bond yields, each from the official publisher ─────────────────
+def bbk(key):
+    """Deutsche Bundesbank time-series API (e.g. German 10Y yield, daily)."""
+    flow, series = key.split("/", 1)
+    url = (f"https://api.statistiken.bundesbank.de/rest/data/{flow}/{series}"
+           f"?format=csv&lang=en&startPeriod={START.isoformat()}")
+    rows = re.findall(r"^(\d{4}-\d{2}-\d{2}),(-?\d+\.?\d*),", session().get(url, timeout=60).text, re.M)
+    s = pd.Series({pd.Timestamp(d): float(v) for d, v in rows}, dtype=float)
+    if s.empty:
+        raise ValueError("Bundesbank returned no rows")
+    return _save_cache("bbk", key, s)
+
+
+def mof_jgb(tenor):
+    """Japan Ministry of Finance JGB benchmark yields: full history file plus the current month."""
+    base = "https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/"
+    out = {}
+    for path in ["historical/jgbcme_all.csv", "jgbcme.csv"]:
+        txt = session().get(base + path, timeout=60).content.decode("utf-8", errors="ignore")
+        lines = [l for l in txt.splitlines() if re.match(r"^(Date|\d{4}/\d{1,2}/\d{1,2}),", l)]
+        df = pd.read_csv(io.StringIO("\n".join(lines)))
+        df = df[pd.to_numeric(df[tenor], errors="coerce").notna()]
+        for d, v in zip(pd.to_datetime(df["Date"], format="%Y/%m/%d"), df[tenor].astype(float)):
+            if d.date() >= START:
+                out[d] = v
+    return _save_cache("mof_jgb", tenor, pd.Series(out, dtype=float))
+
+
+def boe(code):
+    """Bank of England database (e.g. IUDMNPY: 10Y nominal par gilt yield, daily)."""
+    url = ("https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes"
+           f"&Datefrom={START.strftime('%d/%b/%Y')}&Dateto=now&SeriesCodes={code}&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N")
+    rows = re.findall(r"^(\d{2} \w{3} \d{4}),(-?\d+\.?\d*)", session().get(url, timeout=60).text, re.M)
+    s = pd.Series({pd.Timestamp(dt.datetime.strptime(d, "%d %b %Y")): float(v) for d, v in rows}, dtype=float)
+    if s.empty:
+        raise ValueError("Bank of England returned no rows")
+    return _save_cache("boe", code, s)
+
+
+def _ak(*names):
+    """akshare renames functions between versions; take the first that exists."""
+    import akshare as ak
+    for n in names:
+        try:
+            return getattr(ak, n)
+        except AttributeError:
+            continue
+    raise AttributeError(f"akshare has none of {names}")
+
+
+def akshare_cn_yield(col):
+    """China government bond yields (ChinaBond via Eastmoney), e.g. 中国国债收益率10年."""
+    df = _ak("bond_zh_us_yield_em", "bond_zh_us_rate")(start_date=START.strftime("%Y%m%d"))
+    s = pd.Series(pd.to_numeric(df[col], errors="coerce").values, index=pd.to_datetime(df["日期"])).dropna()
+    return _save_cache("akshare_cn_yield", col, s)
+
+
+def akshare_index(symbol):
+    """Mainland China index closes from Sina (e.g. sh000300 = CSI 300). Yahoo's copy is unreliable."""
+    df = _ak("index_zh_daily_sina", "stock_zh_index_daily")(symbol=symbol)
+    s = pd.Series(df["close"].astype(float).values, index=pd.to_datetime(df["date"]))
+    return _save_cache("akshare_index", symbol, s[s.index >= pd.Timestamp(START)])
+
+
 # ── China M2 (PBoC via akshare) ──────────────────────────────────────────────
 def akshare_cn_m2(_):
-    import akshare as ak
-    df = ak.macro_china_money_supply()
+    df = _ak("macro_china_money_supply_em", "macro_china_money_supply")()
     col_m = df.columns[0]                     # e.g. "2026年10月份"
     col_v = [c for c in df.columns if "M2" in c and "数量" in c][0]
     idx = [pd.Timestamp(dt.datetime.strptime(re.sub(r"月份$", "", m), "%Y年%m")) + pd.offsets.MonthEnd(0)
@@ -223,4 +288,9 @@ FETCHERS = {
     "boj": boj,
     "akshare_cn_m2": akshare_cn_m2,
     "rbi_mmo": rbi_mmo,
+    "bbk": bbk,
+    "mof_jgb": mof_jgb,
+    "boe": boe,
+    "akshare_cn_yield": akshare_cn_yield,
+    "akshare_index": akshare_index,
 }

@@ -56,7 +56,7 @@ body { font: 15px/1.45 var(--font-anthropic-sans); -webkit-font-smoothing: antia
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
 window.dash = (function () {
-  const SETS = ["health", "read", "implications", "watch", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts"];
+  const SETS = ["health", "read", "implications", "watch", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer3_gl", "layer1", "catalysts"];
   const store = {}; SETS.forEach(s => { store[s] = { status: 'loading', data: [] }; });
   const draws = new Map();
   let started = false;
@@ -430,6 +430,38 @@ window.dash = (function () {
     <p class="fq-muted" id="spread">Semiconductors (SMH, converted to rupees) minus Nifty IT in <span data-draw="d-month">—</span>: <span class="fq-num" data-draw="spread" data-source="layer3_us" data-field="smh_inr_minus_nifty_it">—</span>. A wide gap means global AI hardware and Indian IT services are moving apart.</p>
   </section>
 
+  <section class="fq-section" id="global">
+    <div class="fq-sechead">
+      <h2>Global markets</h2>
+      <span class="fq-muted">World equity markets ranked by rupee return, currencies against the rupee, and global bond yields</span>
+    </div>
+    <div class="fq-group" id="global-equity">
+      <h3>World equity markets, ranked in rupees (last six months)</h3>
+      <div class="fq-legend" data-draw="gl-legend" aria-label="Regions"></div>
+      <div class="fq-wrap"><div class="fq-scroll"><div class="fq-quilt fq-small dash-skeleton" data-draw="quilt" data-set="layer3_gl" data-source="layer3_gl" role="img" aria-label="World equity market returns in rupees, ranked by month"></div></div></div>
+      <div class="fq-tablewrap">
+        <table class="fq-table" data-source="layer3_gl" data-row-key="key" aria-label="World equity markets, latest completed month">
+          <thead>
+            <tr>
+              <th data-field="name">Market (fund)</th>
+              <th data-field="ret_inr">1M INR</th>
+              <th data-field="ret_local">1M USD</th>
+              <th data-field="idx_name">Headline index</th>
+              <th data-field="idx_ret">1M local</th>
+              <th data-field="ret_3m">3M INR</th>
+              <th data-field="rank">Rank</th>
+              <th data-field="flags">Flags</th>
+            </tr>
+          </thead>
+          <tbody data-draw="gl-table"></tbody>
+        </table>
+      </div>
+      <p class="fq-muted">Each market is ranked on a US-listed country fund, with dividends, converted to rupees, so every market is measured the same way. The headline index is shown in its own currency for reference. Hong Kong's fund holds local companies only; the Hang Seng also holds mainland giants such as Tencent and Alibaba, so the two can differ.</p>
+    </div>
+    <div class="fq-group" id="global-fx"><h3>Currencies against the rupee</h3><div class="fq-cards dash-skeleton" data-draw="macro" data-group="Currencies vs rupee" data-source="layer1"></div></div>
+    <div class="fq-group" id="global-rates"><h3>Global bond yields and funds</h3><div class="fq-cards dash-skeleton" data-draw="macro" data-group="Global rates" data-source="layer1"></div></div>
+  </section>
+
   <section class="fq-section" id="catalysts">
     <div class="fq-sechead">
       <h2>Forward catalysts</h2>
@@ -460,6 +492,9 @@ window.dash = (function () {
       <dt>Volatility</dt><dd>Annualised standard deviation of daily returns over the past year.</dd>
       <dt>Trend stretch</dt><dd>How far price sits from its 200-day average, measured in units of its own volatility. Beyond ±2 is flagged as stretched. Not shown for cash, which rises every day.</dd>
       <dt>Gold</dt><dd>International gold converted to rupees, so it ranks on the same basis as other global assets. Indian gold can differ by several points in a month because of import duty and the local premium.</dd>
+      <dt>World markets</dt><dd>Each market is a US-listed country fund (for example EWJ for Japan, CQQQ for China tech) with dividends included, converted to rupees. India is the Nifty 50 total-return index. CSI 300 comes from Sina because Yahoo's copy was unreliable.</dd>
+      <dt>Currencies against the rupee</dt><dd>Rupees per unit of each currency, built on the same USD/INR series used everywhere else. Up means that currency strengthened against the rupee, which helps a rupee investor holding it. The dirham is pegged to the dollar at 3.6725.</dd>
+      <dt>Global yields</dt><dd>Daily 10-year yields from each official publisher: the Fed (FRED), Bundesbank, Japan's Ministry of Finance, Bank of England and ChinaBond. India's is a monthly average because there is no free daily feed. The data checks compare each daily feed with the OECD's monthly figure.</dd>
       <dt>Current month</dt><dd>The last column is month to date and its tiles have a dashed outline. Rankings there will change.</dd>
     </dl>
   </details>
@@ -806,6 +841,30 @@ window.dash = (function () {
       i.style.background = FQ.color(f); s.append(i, document.createTextNode(f)); return s;
     }));
   });
+  const REGIONS = ['India', 'China & HK', 'Other Asia', 'Europe', 'US'];
+  const regionColor = (f) => dash.colors[Math.max(0, REGIONS.indexOf(f)) % dash.colors.length];
+  dash.draw('gl-legend', (el) => {
+    el.replaceChildren(...REGIONS.map(f => {
+      const s = document.createElement('span'); const i = document.createElement('i');
+      i.style.background = regionColor(f); s.append(i, document.createTextNode(f)); return s;
+    }));
+  });
+  dash.draw('gl-table', (tb) => {
+    const d = FQ.rows('layer3_gl');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    const m = FQ.latestDone(d.rows);
+    const rows = d.rows.filter(r => r.m === m).sort((a, b) => a.rank - b.rank);
+    tb.replaceChildren(...rows.map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const ret = (v) => td(FQ.pct(v), 'fq-num' + (v < 0 ? ' fq-neg' : ''));
+      const flags = document.createElement('td'); flags.className = 'fq-l'; FQ.pills(flags, r.flags);
+      tr.append(td(r.name), ret(r.ret_inr), r.ccy === 'USD' ? ret(r.ret_local) : td('—', 'fq-num'),
+        td(r.idx_name ? r.idx_name + ' (' + r.idx_ccy + ')' : '—'), ret(r.idx_ret),
+        ret(r.ret_3m), td(r.rank, 'fq-num'), flags);
+      return tr;
+    }));
+  });
 
   // ── Layer 1 cards ────────────────────────────────────────────────────────
   // Returns [prefix, number, suffix]: only the number goes in the marked element,
@@ -820,12 +879,15 @@ window.dash = (function () {
       case 'pp': return ['', FQ.signed(v), 'pp'];
       case 'INR': return ['₹', v.toFixed(2), ''];
       case 'index': return ['', v.toFixed(1), ''];
-      default: return ['', v.toFixed(3), ''];
+      case 'ret': return ['', FQ.signed(v * 100, 1), '% this month'];
+      default:
+        if (/^₹ per /.test(r.units)) return ['₹', v.toFixed(2), r.units.slice(1)];
+        return ['', v.toFixed(3), ''];
     }
   }
   function fmtChange(r, which) {
-    const v = which === 1 ? r.chg_1 : r.chg_3;
-    if (r.change_type === 'pct' || r.change_type === 'yoy') return FQ.pct(v);
+    const v = which === 1 ? r.chg_1 : which === 12 ? r.chg_12 : r.chg_3;
+    if (r.change_type === 'pct' || r.change_type === 'yoy' || r.change_type === 'ret') return FQ.pct(v);
     if (r.change_type === 'diff') return FQ.signed(v) + (r.units === '%' || r.units === 'pp' ? 'pp' : '');
     return '';
   }
@@ -851,8 +913,15 @@ window.dash = (function () {
       val.append(pre, num, suf);
       const chg = document.createElement('div'); chg.className = 'fq-ind-chg';
       const asof = ' · as of ' + r.obs_date;
+      const mk = (field, which) => { const s = document.createElement('span'); s.dataset.source = 'layer1'; s.dataset.field = field; s.dataset.where = 'key=' + r.key; s.textContent = fmtChange(r, which); return s; };
       if (r.change_type === 'level') {
         chg.textContent = (r.note ? r.note : '') + asof;
+      } else if (r.change_type === 'ret') {
+        chg.append('3M ', mk('chg_3', 3), ' · 12M ', mk('chg_12', 12), asof);
+        if (r.note) chg.append(document.createElement('br'), r.note);
+      } else if (r.chg_12 != null && /Currencies|Global/.test(group)) {
+        chg.append('1M ', mk('chg_1', 1), ' · 3M ', mk('chg_3', 3), ' · 12M ', mk('chg_12', 12), asof);
+        if (r.note) chg.append(document.createElement('br'), r.note);
       } else {
         const l1 = r.change_type === 'yoy' ? 'YoY ' : '1M ', l3 = r.change_type === 'yoy' ? '3M annualised ' : '3M ';
         const a = document.createElement('span'); a.dataset.source = 'layer1'; a.dataset.field = 'chg_1'; a.dataset.where = 'key=' + r.key; a.textContent = fmtChange(r, 1);
@@ -873,8 +942,9 @@ window.dash = (function () {
     if (d.status !== 'ok') return FQ.failed(el, 'the quilt');
     FQ.done(el);
     const isAsset = set === 'layer2';
+    const isGlobal = set === 'layer3_gl';
     const local = isAsset && FQ.ccy === 'local';
-    const field = isAsset ? (local ? 'ret_local' : 'ret_inr') : 'ret_local';
+    const field = isAsset ? (local ? 'ret_local' : 'ret_inr') : isGlobal ? 'ret_inr' : 'ret_local';
     const rankField = isAsset ? (local ? 'rank_local' : 'rank') : 'rank';
     let months = [...new Set(d.rows.map(r => r.m))].sort();
     if (!isAsset) months = months.slice(-6);
@@ -898,9 +968,9 @@ window.dash = (function () {
         const r = byMonth.get(m)[i];
         const c = document.createElement('div');
         if (!r) { frag.push(c); return; }
-        const col = isAsset ? FQ.color(r.family) : sectorColor;
+        const col = isAsset ? FQ.color(r.family) : isGlobal ? regionColor(r.family) : sectorColor;
         c.className = 'fq-cell' + (r.mtd ? ' fq-mtdcell' : '');
-        c.style.background = `color-mix(in srgb, ${col} ${isAsset ? 20 : 12}%, var(--color-panel))`;
+        c.style.background = `color-mix(in srgb, ${col} ${isAsset || isGlobal ? 20 : 12}%, var(--color-panel))`;
         c.style.borderLeftColor = col;
         c.dataset.id = r.id; c.dataset.key = r.key;
         c.dataset.source = set; c.dataset.field = field; c.dataset.where = 'key=' + r.key;
@@ -930,6 +1000,11 @@ window.dash = (function () {
       const dl = document.createElement('dl');
       const add = (k, v) => { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; dl.append(dt, dd); };
       if (isAsset) { add('1M in INR', FQ.pct(r.ret_inr)); add('1M in ' + r.ccy, FQ.pct(r.ret_local)); }
+      else if (isGlobal) {
+        add('1M in INR', FQ.pct(r.ret_inr));
+        if (r.ccy === 'USD') add('1M in USD', FQ.pct(r.ret_local));
+        if (r.idx_name && r.id !== 'IN_LARGE') add(r.idx_name + ' (' + r.idx_ccy + ')', FQ.pct(r.idx_ret));
+      }
       else { add('1M (' + r.ccy + ')', FQ.pct(r.ret_local)); if (r.ccy === 'USD' && r.ret_inr != null) add('1M in INR', FQ.pct(r.ret_inr)); }
       add('Rank', r[rankField] + ' of ' + byMonth.get(r.m).length);
       add('3M return', FQ.pct(r.ret_3m)); add('3M rank', r.rank_3m ?? '—');
@@ -1048,7 +1123,7 @@ window.dash = (function () {
 </script>
 
 <footer class="site-foot">
-  <p>Data as of 2026-11-27. Sources: NSE Indices (niftyindices.com), Yahoo Finance, FRED (Federal Reserve Bank of St. Louis), ECB Data Portal, Bank of Japan, People's Bank of China, Reserve Bank of India, Polymarket and Kalshi.</p>
+  <p>Data as of 2026-11-27. Sources: NSE Indices (niftyindices.com), Yahoo Finance, FRED (Federal Reserve Bank of St. Louis), ECB Data Portal, Bank of Japan, Deutsche Bundesbank, Japan Ministry of Finance, Bank of England, ChinaBond and Sina (via akshare), People's Bank of China, Reserve Bank of India, CFTC, NSDL, NSE, Polymarket and Kalshi.</p>
   <p>For information and discussion only. Nothing here is investment advice or a recommendation to buy or sell any security.</p>
 </footer>
 </main>

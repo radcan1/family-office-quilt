@@ -4,7 +4,7 @@ export.py — package the quilt tables as the data files the published page
 reads. Each file is JSON {rows, meta}: the rows, plus the code that produced
 them, so a reader can check how every number was worked out.
 
-Writes data/export/{layer2,layer3_in,layer3_us,layer1,catalysts,quality}.json.
+Writes data/export/{layer2,layer3_in,layer3_us,layer3_gl,layer1,catalysts,quality,...}.json.
 Run after run.py and quilt.py.
 """
 
@@ -38,7 +38,13 @@ SHORT = {
     "US_XLY": "Cons Disc", "US_XLF": "Financials", "US_XLI": "Industrials", "US_XLV": "Health Care",
     "US_XLP": "Staples", "US_XLE": "Energy", "US_XLB": "Materials", "US_XLU": "Utilities",
     "US_XLRE": "Real Estate",
+    "GL_CN_TECH": "China tech", "GL_CN_LARGE": "China large", "GL_CN_A": "China A", "GL_HK": "Hong Kong",
+    "GL_JP": "Japan", "GL_KR": "Korea", "GL_TW": "Taiwan", "GL_DE": "Germany", "GL_EZ": "Euro area", "GL_UK": "UK",
 }
+# World markets are coloured by region so India and China stand out.
+REGION_FAMILY = {"India": "India", "China": "China & HK", "Hong Kong": "China & HK", "Japan": "Other Asia",
+                 "Korea": "Other Asia", "Taiwan": "Other Asia", "Germany": "Europe", "Euro area": "Europe", "UK": "Europe",
+                 "US": "US"}
 FAMILY = {
     **dict.fromkeys(["IN_LARGE", "IN_MID", "IN_SMALL"], "Indian equity"),
     **dict.fromkeys(["US_LARGE", "US_TECH", "US_SMALL", "DM_EXUS", "EM"], "Global equity"),
@@ -84,6 +90,10 @@ def quilt_table(path, family=None):
     cols = ["key", "m", "mtd", "id", "name", "short", "ccy", "ret_local", "ret_inr", "rank", "ret_3m",
             "rank_3m", "rank_change", "vol", "stretch", "flags", "obs_date"]
     cols += [c for c in ["family", "rank_local"] if c in df.columns]
+    if "region" in df.columns:
+        df["short"] = df["short"].fillna(df["id"].map({"IN_LARGE": "India", "US_LARGE": "US"}))
+        df["family"] = df["region"].map(REGION_FAMILY)
+        cols += ["region", "family", "idx_name", "idx_ccy", "idx_basis", "idx_ret"]
     return df[cols]
 
 
@@ -98,12 +108,13 @@ def main():
     us = us.merge(sp[["m", "smh_inr_minus_nifty_it"]], on="m", how="left")
     us.loc[us["id"] != "US_SMH", "smh_inr_minus_nifty_it"] = None
     write("layer3_us", us, meta_q)
+    write("layer3_gl", quilt_table(os.path.join(Q, "layer3_gl.csv")), meta_q)
 
     l1 = last_months(pd.read_csv(os.path.join(Q, "layer1.csv")))
     l1["m"] = l1["month"].str[:7]
     l1["key"] = l1["m"] + "|" + l1["key"]
     write("layer1", l1[["key", "m", "mtd", "group", "label", "value", "units", "change_type", "chg_1", "chg_3",
-                        "obs_date", "note"]], meta_q)
+                        "chg_12", "obs_date", "note"]], meta_q)
 
     cat_file = sorted(glob.glob(os.path.join(HERE, "data", "catalysts_*.csv")))[-1]
     cat = pd.read_csv(cat_file)

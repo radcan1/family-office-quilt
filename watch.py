@@ -8,7 +8,7 @@ Status per item:
   Calm        neither
   Upcoming    a dated event, with today's market odds
 
-Writes data/analysis/watch_<memo month>.json.   python3 watch.py 2026-10
+Writes data/analysis/watch_<memo month>.json, plus a dated copy watch_<month>_<run date>.json.   python3 watch.py 2026-10
 """
 
 import datetime as dt
@@ -32,6 +32,27 @@ def latest(source):
         g = pd.read_csv(os.path.join(D, "positioning", "gauges.csv"), parse_dates=["date"])
         s = g[g.gauge == key].sort_values("date")
         return float(s.value.iloc[-1]), str(s.date.iloc[-1].date())
+    if kind == "chg":
+        # Percentage change over the last N trading days:  chg:<series>:<days>
+        sid, n = key.split(":")
+        s = pd.read_csv(os.path.join(D, "daily", f"{sid}.csv"), parse_dates=["date"]).dropna()
+        return float((s.value.iloc[-1] / s.value.iloc[-1 - int(n)] - 1) * 100), str(s.date.iloc[-1].date())
+    if kind == "spread":
+        # Latest value of a minus latest value of b:  spread:<a>-<b>
+        a, b = (pd.read_csv(os.path.join(D, "daily", f"{x}.csv"), parse_dates=["date"]).dropna().iloc[-1] for x in key.split("-"))
+        return float(a.value - b.value), str(max(a.date, b.date).date())
+    if kind == "relret":
+        # Rupee return of a minus rupee return of b over N trading days, in pp:  relret:<a>,<b>,<days>
+        a, b, n = key.split(",")
+        inr = pd.read_csv(os.path.join(D, "daily", "USDINR.csv"), parse_dates=["date"]).set_index("date")["value"]
+        def inr_ret(x):
+            s = pd.read_csv(os.path.join(D, "daily", f"{x}.csv"), parse_dates=["date"]).set_index("date")["value"].dropna()
+            if x.startswith(("GL_", "US_")):
+                s = (s * inr.reindex(s.index, method="ffill")).dropna()
+            return s
+        j = pd.concat([inr_ret(a), inr_ret(b)], axis=1, join="inner").dropna()
+        r = j.iloc[-1] / j.iloc[-1 - int(n)] - 1
+        return float((r.iloc[0] - r.iloc[1]) * 100), str(j.index[-1].date())
     if kind == "implied":
         im = pd.read_csv(os.path.join(D, "positioning", "implied.csv"), parse_dates=["as_of", "expiry"])
         x = im[im.underlying == key]
@@ -48,6 +69,8 @@ def fmt(v, it):
         return f"{sign}{u}{s}"
     if u == "±%":
         return f"±{s}%"
+    if u in ("pp", "% chg"):
+        return f"{'−' if v < 0 else '+'}{s}{'pp' if u == 'pp' else '%'}"
     return f"{sign}{s}{(' ' + u) if u and u != '%' else u}"
 
 
@@ -107,6 +130,8 @@ def run(month=None, today=None):
     out = dict(month=month, run=str(today), items=rows)
     os.makedirs(os.path.join(D, "analysis"), exist_ok=True)
     json.dump(out, open(os.path.join(D, "analysis", f"watch_{month}.json"), "w"), indent=2, ensure_ascii=False)
+    # A dated copy too: a reading quoted in the implications stays checkable after the data moves on.
+    json.dump(out, open(os.path.join(D, "analysis", f"watch_{month}_{today}.json"), "w"), indent=2, ensure_ascii=False)
     return out
 
 

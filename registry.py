@@ -73,6 +73,43 @@ LAYER3_US = [
     ("US_XLRE", "Real Estate (XLRE)", "yahoo_tr", "XLRE"),
 ]
 
+# ── Layer 3 (global): world equity markets, ranked in INR ────────────────────
+# US-listed country ETFs (dividend-adjusted, in USD) so every market is on the
+# same total-return basis and converts to INR the same way as the other tiles.
+# `index` is the headline index (GLOBAL_INDICES) shown alongside in its own
+# currency; None where no free headline series exists.
+# (id, name, source, source_id, region, headline index id)
+LAYER3_GLOBAL = [
+    ("GL_CN_TECH", "China tech (CQQQ)",        "yahoo_tr", "CQQQ", "China",       None),
+    ("GL_CN_LARGE", "China large caps (FXI)",  "yahoo_tr", "FXI",  "China",       "GI_HSCEI"),
+    ("GL_CN_A",    "China A-shares (ASHR)",    "yahoo_tr", "ASHR", "China",       "GI_CSI300"),
+    ("GL_HK",      "Hong Kong (EWH)",          "yahoo_tr", "EWH",  "Hong Kong",   "GI_HSI"),
+    ("GL_JP",      "Japan (EWJ)",              "yahoo_tr", "EWJ",  "Japan",       "GI_N225"),
+    ("GL_KR",      "Korea (EWY)",              "yahoo_tr", "EWY",  "Korea",       "GI_KOSPI"),
+    ("GL_TW",      "Taiwan (EWT)",             "yahoo_tr", "EWT",  "Taiwan",      "GI_TAIEX"),
+    ("GL_DE",      "Germany (EWG)",            "yahoo_tr", "EWG",  "Germany",     "GI_DAX"),
+    ("GL_EZ",      "Euro area (FEZ)",          "yahoo_tr", "FEZ",  "Euro area",   "GI_SX5E"),
+    ("GL_UK",      "UK (EWU)",                 "yahoo_tr", "EWU",  "UK",          "GI_FTSE"),
+]
+# Reference rows ranked alongside the global markets (already loaded in Layer 2).
+GLOBAL_REFERENCE = [("IN_LARGE", "India (Nifty 50 TRI)", "India"), ("US_LARGE", "US (S&P 500, SPY)", "US")]
+
+# Headline indices in local currency. Price indices except the DAX, which is a
+# total-return index by construction. CSI 300 comes from Sina via akshare:
+# Yahoo's 000300.SS had one row and a level about 4% off on 2026-11-27.
+# (id, name, source, source_id, currency, basis)
+GLOBAL_INDICES = [
+    ("GI_HSI",    "Hang Seng",               "yahoo_px",      "^HSI",       "HKD", "price"),
+    ("GI_HSCEI",  "Hang Seng China Enterprises", "yahoo_px",  "^HSCE",      "HKD", "price"),
+    ("GI_CSI300", "CSI 300",                 "akshare_index", "sh000300",   "CNY", "price"),
+    ("GI_N225",   "Nikkei 225",              "yahoo_px",      "^N225",      "JPY", "price"),
+    ("GI_KOSPI",  "KOSPI",                   "yahoo_px",      "^KS11",      "KRW", "price"),
+    ("GI_TAIEX",  "Taiwan TAIEX",            "yahoo_px",      "^TWII",      "TWD", "price"),
+    ("GI_DAX",    "DAX",                     "yahoo_px",      "^GDAXI",     "EUR", "total_return"),
+    ("GI_SX5E",   "Euro Stoxx 50",           "yahoo_px",      "^STOXX50E",  "EUR", "price"),
+    ("GI_FTSE",   "FTSE 100",                "yahoo_px",      "^FTSE",      "GBP", "price"),
+]
+
 # ── Layer 1: macro, liquidity, rates, FX, vol, ratio inputs (unranked) ───────
 # (id, name, source, source_id, units, scale, frequency, basis)
 LAYER1 = [
@@ -103,6 +140,21 @@ LAYER1 = [
     # India liquidity: RBI daily Money Market Operations release, line F
     # "Net liquidity injected (outstanding incl. today's operations)".
     ("RBI_NETLIQ", "RBI net liquidity (LAF+MSF+SLF-SDF)", "rbi_mmo", "F", "INR cr", 1.0, "D", "level"),
+    # Global 10Y government bond yields, each from its official publisher (daily).
+    ("DE10Y",      "Germany 10Y Bund yield",        "bbk", "BBSIS/D.I.ZST.ZI.EUR.S1311.B.A604.R10XX.R.A.A._Z._Z.A", "%", 1.0, "D", "yield_pct"),
+    ("JP10Y",      "Japan 10Y JGB yield",           "mof_jgb", "10Y",      "%", 1.0, "D", "yield_pct"),
+    ("UK10Y",      "UK 10Y gilt yield",             "boe", "IUDMNPY",      "%", 1.0, "D", "yield_pct"),
+    ("CN10Y",      "China 10Y government bond yield", "akshare_cn_yield", "中国国债收益率10年", "%", 1.0, "D", "yield_pct"),
+    # Global bond funds (shown in the rates panel with INR returns, not ranked).
+    ("BWX_TR",     "International govt bonds (BWX)", "yahoo_tr", "BWX",   "index", 1.0, "D", "total_return"),
+    ("EMB_TR",     "EM dollar bonds (EMB)",         "yahoo_tr", "EMB",    "index", 1.0, "D", "total_return"),
+    # Currencies against the rupee. Same rule as USD/INR: the Fed's H.10 rate
+    # (FRED) wherever it exists, Yahoo only for the days after its last print.
+    ("GBPUSD",     "GBP/USD (FRED H.10, Yahoo for latest days)", "spliced", "X_GBPUSD_FRED+X_GBPUSD_YAHOO", "USD per GBP", 1.0, "D", "fx"),
+    ("EURUSD_SP",  "EUR/USD (FRED H.10, Yahoo for latest days)", "spliced", "EURUSD+X_EURUSD_YAHOO", "USD per EUR", 1.0, "D", "fx"),
+    ("USDJPY_SP",  "USD/JPY (FRED H.10, Yahoo for latest days)", "spliced", "USDJPY+X_USDJPY_YAHOO", "JPY per USD", 1.0, "D", "fx"),
+    ("USDCNY_SP",  "USD/CNY (FRED H.10, Yahoo for latest days)", "spliced", "X_USDCNY_FRED+USDCNY", "CNY per USD", 1.0, "D", "fx"),
+    ("USDSGD",     "USD/SGD (FRED H.10, Yahoo for latest days)", "spliced", "X_USDSGD_FRED+X_USDSGD_YAHOO", "SGD per USD", 1.0, "D", "fx"),
     # FX & vol
     # USD/INR used for every INR conversion. Built in run.py: the Fed's H.10
     # noon rate (FRED DEXINUS, official, published weekly) for all dates it
@@ -134,7 +186,25 @@ CROSSCHECK = [
     ("X_GOLDBEES",   "Gold BeES (INR gold ETF)", "yahoo_tr", "GOLDBEES.NS"),
     ("X_SPY_PRICE",  "SPY price only",           "yahoo_px", "SPY"),
     ("X_HYG_PRICE",  "HYG price only",           "yahoo_px", "HYG"),
+    # Inputs to the spliced currency series above
+    ("X_GBPUSD_FRED",  "GBP/USD (FRED)",  "fred",     "DEXUSUK"),
+    ("X_GBPUSD_YAHOO", "GBP/USD (Yahoo)", "yahoo_px", "GBPUSD=X"),
+    ("X_EURUSD_YAHOO", "EUR/USD (Yahoo)", "yahoo_px", "EURUSD=X"),
+    ("X_USDJPY_YAHOO", "USD/JPY (Yahoo)", "yahoo_px", "JPY=X"),
+    ("X_USDCNY_FRED",  "USD/CNY (FRED)",  "fred",     "DEXCHUS"),
+    ("X_USDSGD_FRED",  "USD/SGD (FRED)",  "fred",     "DEXSIUS"),
+    ("X_USDSGD_YAHOO", "USD/SGD (Yahoo)", "yahoo_px", "SGD=X"),
+    # Used only to convert headline indices to USD for the ETF tracking check
+    ("X_USDKRW_YAHOO", "USD/KRW (Yahoo)", "yahoo_px", "KRW=X"),
+    ("X_USDTWD_YAHOO", "USD/TWD (Yahoo)", "yahoo_px", "TWD=X"),
+    # OECD monthly-average 10Y yields: an independent check on the daily feeds
+    ("X_DE10Y_OECD", "Germany 10Y (OECD monthly avg)", "fred", "IRLTLT01DEM156N", "M"),
+    ("X_JP10Y_OECD", "Japan 10Y (OECD monthly avg)",   "fred", "IRLTLT01JPM156N", "M"),
+    ("X_UK10Y_OECD", "UK 10Y (OECD monthly avg)",      "fred", "IRLTLT01GBM156N", "M"),
 ]
+
+# AED is pegged to the dollar by the UAE central bank at 3.6725 per USD.
+AED_PER_USD = 3.6725
 
 
 def all_series():
@@ -149,12 +219,18 @@ def all_series():
     for i, n, src, sid in LAYER3_US:
         out.append(dict(id=i, name=n, source=src, source_id=sid, ccy="USD", basis="total_return",
                         layer="L3_US", units="index", scale=1.0, freq="D"))
+    for i, n, src, sid, region, _ in LAYER3_GLOBAL:
+        out.append(dict(id=i, name=n, source=src, source_id=sid, ccy="USD", basis="total_return",
+                        layer="L3_GL", units="index", scale=1.0, freq="D", region=region))
+    for i, n, src, sid, ccy, basis in GLOBAL_INDICES:
+        out.append(dict(id=i, name=n, source=src, source_id=sid, ccy=ccy, basis=basis,
+                        layer="GI", units=ccy, scale=1.0, freq="D"))
     for i, n, src, sid, units, scale, freq, basis in LAYER1:
         out.append(dict(id=i, name=n, source=src, source_id=sid, ccy=None, basis=basis,
                         layer="L1", units=units, scale=scale, freq=freq))
-    for i, n, src, sid in CROSSCHECK:
+    for i, n, src, sid, *freq in CROSSCHECK:
         out.append(dict(id=i, name=n, source=src, source_id=sid, ccy=None, basis="check",
-                        layer="X", units="raw", scale=1.0, freq="D"))
+                        layer="X", units="raw", scale=1.0, freq=freq[0] if freq else "D"))
     return out
 
 
