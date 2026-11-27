@@ -151,7 +151,7 @@ def main():
     j = cur.set_index("id")["rank"].to_frame("now").join(prev.set_index("id")["rank"].to_frame("prev")).dropna()
     rho = j["now"].rank().corr(j["prev"].rank())   # Spearman = Pearson on ranks
     F.add("persistence", "turnover",
-          f"{len(kept)} of last month's top 5 stayed in the top 5 ({', '.join(SHORT[i] for i in kept) or 'none'}). "
+          f"{len(kept)} of last month's top 5 stayed in the top 5 ({', '.join(SHORT[i] for i in sorted(kept)) or 'none'}). "
           f"Rank correlation with last month: {rho:+.2f} (near +1 = same order, near −1 = reversal).",
           flag=rho < 0, kept=sorted(kept), rank_correlation=rho)
     mv = cur.dropna(subset=["rank_change"]).sort_values("rank_change")

@@ -11,15 +11,23 @@ catalysts from Polymarket, cross-checked against Kalshi.
 
 ```bash
 pip install -r requirements.txt
-python3 run.py          # fetch and validate every series (~1 minute)
-python3 quilt.py        # monthly returns, ranks, Layer 1 indicators
-python3 export.py       # data files for the page
-python3 build_site.py   # rebuild docs/ for GitHub Pages
-git add -A && git commit -m "Data refresh $(date +%F)" && git push
+python3 run.py             # fetch and validate every series, plus prediction markets (~1 minute)
+python3 positioning.py     # CFTC, NSDL, NSE and options positioning (NSE files fetched politely, cached)
+python3 quilt.py           # monthly returns, ranks, Layer 1 indicators
+python3 analysis.py        # facts for the latest completed month (and the month before, for changes)
+# then, by hand: research the news (memos/<month>_context.json), write the memo
+# (memos/<month>.json) and implications (memos/<month>_implications.json) from the facts
+python3 export.py          # data files for the page; refreshes the watchlist
+python3 build_site.py      # runs checks.py and refuses to publish on any failure
+git add -A && git commit -m "Monthly read $(date +%F)" && git push
 ```
 
-Check `data/quality_report_<date>.md` before publishing. Every series is
-checked for freshness, total-return basis and agreement across sources.
+`build_site.py` runs every check in `checks.py` first: freshness of each source,
+accuracy cross-checks, positioning ranges, prediction-market staleness, news
+sourcing rules, and an audit that every number in the memo and implications
+traces back to the computed facts, the sourced news or the watchlist. Any
+failure stops the publish. The results appear on the page under "Data health".
+Watchlist levels live in `watchlist.json`; edit them freely.
 
 ## How it fits together
 

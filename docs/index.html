@@ -56,7 +56,7 @@ body { font: 15px/1.45 var(--font-anthropic-sans); -webkit-font-smoothing: antia
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
 window.dash = (function () {
-  const SETS = ["read", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"];
+  const SETS = ["health", "read", "implications", "watch", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts"];
   const store = {}; SETS.forEach(s => { store[s] = { status: 'loading', data: [] }; });
   const draws = new Map();
   let started = false;
@@ -165,6 +165,24 @@ window.dash = (function () {
   .fq-bar i { display: block; height: 100%; }
   .fq-out .fq-num { text-align: right; }
 
+  /* Health, implications, watchlist */
+  .fq-health { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fq-health a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .fq-health-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-fg-muted); display: inline-block; }
+  .fq-health-dot.fq-ok { background: var(--color-ok); }
+  .fq-health-dot.fq-warnc { background: var(--color-warn); }
+  .fq-health-dot.fq-badc { background: var(--color-bad); }
+  .fq-disclaimer { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); border-left: 3px solid var(--color-border-line); padding-left: 10px; max-width: 90ch; }
+  .fq-imps { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--cds-gap-lg) var(--cds-gap-xl); min-height: 160px; }
+  .fq-imps article { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .fq-imps h3 { text-transform: none; letter-spacing: 0; font-size: var(--cds-font-size-body); color: var(--color-fg); }
+  .fq-imps p { font-size: 14px; line-height: 1.55; }
+  .fq-imps .fq-why { color: var(--color-fg-muted); }
+  .fq-actions { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.5; max-width: 95ch; }
+  .fq-actions b { font-weight: var(--cds-font-weight-medium); }
+  .fq-actions .fq-revisit { display: block; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fq-watch td.fq-l { min-width: 160px; }
+
   /* Positioning */
   .fq-clashes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
   .fq-clashes li { border: 1px solid color-mix(in srgb, var(--color-warn) 45%, var(--color-border-line)); background: color-mix(in srgb, var(--color-warn) 8%, var(--color-panel)); border-radius: var(--cds-radius); padding: 8px 12px; font-size: 14px; line-height: 1.45; }
@@ -231,6 +249,7 @@ window.dash = (function () {
     <h1 id="title">Family Office Asset Quilt</h1>
     <p class="fq-take" id="takeaway">In <b data-draw="t-month">—</b>, <b data-draw="t-top">—</b> led the quilt at <span class="fq-num" data-draw="t-topret" data-source="layer2" data-field="ret_inr">—</span> in rupees and <b data-draw="t-bot">—</b> trailed at <span class="fq-num" data-draw="t-botret" data-source="layer2" data-field="ret_inr">—</span>. The rupee <span data-draw="t-fxdir">—</span> <span class="fq-num" data-draw="t-fx" data-source="layer1" data-field="chg_1">—</span> against the dollar that month, which <span data-draw="t-fxeff">—</span> the rupee return of every dollar asset.</p>
     <p class="fq-muted">Monthly total returns, INR base. Global assets are converted at the Fed's USD/INR rate. Rankings are diagnostics for the investment committee, not trade instructions.</p>
+    <p class="fq-health" id="health-strip"><span class="fq-health-dot" data-draw="health-dot"></span><span data-draw="health-strip" data-source="health">—</span> <a href="#health">See every check</a></p>
   </header>
 
   <section class="fq-glance" id="glance">
@@ -259,6 +278,32 @@ window.dash = (function () {
     <div class="fq-qs" id="read-questions">
       <h3>Questions for the committee</h3>
       <ol data-draw="read-questions" data-source="read"></ol>
+    </div>
+  </section>
+
+  <section class="fq-section fq-readbox" id="for-us">
+    <div class="fq-sechead">
+      <h2>What this means for us</h2>
+      <span class="fq-muted">For an INR-based family office</span>
+    </div>
+    <p class="fq-disclaimer" data-draw="imp-disclaimer" data-source="implications">—</p>
+    <div class="fq-imps dash-skeleton" data-draw="implications" data-source="implications"></div>
+    <div class="fq-qs" id="consider">
+      <h3>Points to consider with your advisers</h3>
+      <ol class="fq-actions" data-draw="actions" data-source="implications"></ol>
+    </div>
+  </section>
+
+  <section class="fq-section" id="watch">
+    <div class="fq-sechead">
+      <h2>What we're tracking</h2>
+      <span class="fq-muted">Each item checked against the latest data. Levels are set in watchlist.json and can be changed.</span>
+    </div>
+    <div class="fq-tablewrap">
+      <table class="fq-table fq-watch" data-source="watch" data-row-key="key" aria-label="Watchlist">
+        <thead><tr><th data-field="status">Status</th><th data-field="name">What</th><th data-field="value_text">Latest</th><th data-field="level_text">Levels</th><th data-field="why">Why it matters</th></tr></thead>
+        <tbody data-draw="watch"></tbody>
+      </table>
     </div>
   </section>
 
@@ -394,12 +439,13 @@ window.dash = (function () {
     <p class="fq-muted">Thin means the event holds less money than the threshold set for it, so one trader can move the price. Major repricing means a move of 20 points or more in 30 days.</p>
   </section>
 
-  <details id="quality">
-    <summary>Data checks behind these numbers</summary>
+  <details id="health">
+    <summary>Data health: every check behind this page</summary>
+    <p class="fq-muted" style="margin-top: var(--cds-gap-sm)">Run before every publish. The public site refuses to update if any check fails. Checks cover freshness of every source, total-return and cross-source accuracy, positioning ranges, prediction-market staleness, news sourcing rules, and an audit that every number in the read traces back to computed facts or sourced news.</p>
     <div class="fq-tablewrap" style="margin-top: var(--cds-gap-md)">
-      <table class="fq-table" data-source="quality" data-row-key="check" aria-label="Data checks">
-        <thead><tr><th data-field="check">Check</th><th data-field="status">Result</th><th data-field="detail">Detail</th></tr></thead>
-        <tbody data-draw="quality"></tbody>
+      <table class="fq-table" data-source="health" data-row-key="key" aria-label="Data health checks">
+        <thead><tr><th data-field="area">Area</th><th data-field="check">Check</th><th data-field="status">Result</th><th data-field="detail">Detail</th></tr></thead>
+        <tbody data-draw="health"></tbody>
       </table>
     </div>
   </details>
@@ -536,6 +582,78 @@ window.dash = (function () {
       const t = document.createElement('span'); t.dataset.source = 'read'; t.dataset.field = 'body'; t.dataset.where = 'order=' + r.order;
       t.textContent = r.body;
       li.append(a, t); return li;
+    }));
+  });
+
+  // ── Data health ──────────────────────────────────────────────────────────
+  const healthSummary = () => FQ.rows('health').rows.find(r => r.key === 'summary');
+  dash.draw('health-strip', (el) => {
+    const s = healthSummary();
+    if (!s) { el.textContent = 'Data health not available'; return; }
+    el.textContent = 'Data health: ' + s.passed + ' checks passed, ' + s.warned + ' warning' + (s.warned === 1 ? '' : 's') + ', ' + s.failed + ' failure' + (s.failed === 1 ? '' : 's') + ', checked ' + niceDate(s.as_of) + '.';
+  });
+  dash.draw('health-dot', (el) => {
+    const s = healthSummary();
+    el.className = 'fq-health-dot' + (!s ? '' : s.failed ? ' fq-badc' : s.warned ? ' fq-warnc' : ' fq-ok');
+  });
+  dash.draw('health', (tb) => {
+    const d = FQ.rows('health');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    const rank = { FAIL: 0, WARN: 1, PASS: 2 };
+    const rows = d.rows.filter(r => r.key !== 'summary').sort((a, b) => (rank[a.status] - rank[b.status]) || a.order - b.order);
+    tb.replaceChildren(...rows.map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const st = document.createElement('td'); const pill = document.createElement('span');
+      pill.className = 'fq-pill' + (r.status === 'PASS' ? ' fq-up' : r.status === 'FAIL' ? ' fq-down' : ' fq-warn');
+      pill.textContent = r.status === 'PASS' ? 'Pass' : r.status === 'FAIL' ? 'Fail' : 'Warning'; st.append(pill);
+      tr.append(td(r.area, 'fq-l'), td(r.check, 'fq-l'), st, td(r.detail, 'fq-l'));
+      return tr;
+    }));
+  });
+
+  // ── What this means for us ───────────────────────────────────────────────
+  const impRows = (kind) => FQ.rows('implications').rows.filter(r => r.kind === kind).sort((a, b) => a.order - b.order);
+  const impMark = (el, field, key) => { el.dataset.source = 'implications'; el.dataset.field = field; el.dataset.where = 'key=' + key; return el; };
+  dash.draw('imp-disclaimer', (el) => { const r = impRows('disclaimer')[0]; el.textContent = r ? r.body : '—'; if (r) impMark(el, 'body', r.key); });
+  dash.draw('implications', (el) => {
+    const d = FQ.rows('implications');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the implications');
+    FQ.done(el);
+    el.replaceChildren(...impRows('implication').map(r => {
+      const a = document.createElement('article'); a.id = 'for-us-' + r.order;
+      const h = document.createElement('h3'); h.textContent = r.title;
+      const p = impMark(document.createElement('p'), 'body', r.key); p.textContent = r.body;
+      const w = impMark(document.createElement('p'), 'note', r.key); w.className = 'fq-why'; w.textContent = r.note;
+      a.append(h, p, w); return a;
+    }));
+  });
+  dash.draw('actions', (el) => {
+    el.replaceChildren(...impRows('action').map(r => {
+      const li = document.createElement('li');
+      const b = document.createElement('b'); b.textContent = r.title + '. ';
+      const c = impMark(document.createElement('span'), 'body', r.key); c.textContent = r.body;
+      const v = impMark(document.createElement('span'), 'note', r.key); v.className = 'fq-revisit'; v.textContent = 'Revisit: ' + r.note;
+      li.append(b, c, v); return li;
+    }));
+  });
+
+  // ── Watchlist ────────────────────────────────────────────────────────────
+  dash.draw('watch', (tb) => {
+    const d = FQ.rows('watch');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    tb.replaceChildren(...d.rows.slice().sort((a, b) => a.order - b.order).map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const st = document.createElement('td'); const pill = document.createElement('span');
+      pill.className = 'fq-pill' + (r.status === 'Triggered' ? ' fq-down' : r.status === 'Near' ? ' fq-warn' : r.status === 'Upcoming' ? '' : ' fq-up');
+      pill.textContent = r.status; st.append(pill);
+      const latest = td(r.value_text + (r.detail ? ' (' + r.detail + ')' : ''), 'fq-l');
+      const why = document.createElement('td'); why.className = 'fq-l'; why.textContent = r.why;
+      if (r.status === 'Triggered' && r.if_triggered) { const t = document.createElement('div'); t.className = 'fq-muted'; t.style.marginTop = '4px'; t.textContent = r.if_triggered; why.append(t); }
+      tr.append(st, td(r.name, 'fq-l'), latest, td(r.level_text, 'fq-l'), why);
+      return tr;
     }));
   });
 

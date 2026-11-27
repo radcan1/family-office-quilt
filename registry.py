@@ -114,6 +114,7 @@ LAYER1 = [
     ("INDIAVIX",   "India VIX",                     "yahoo_px", "^INDIAVIX", "index", 1.0, "D", "level"),
     # Ratio inputs (price basis is correct for ratios of levels)
     ("COPPER_FUT", "Copper front future",           "yahoo_px", "HG=F", "USD/lb", 1.0, "D", "price"),
+    ("BRENT_FUT",  "Brent crude front future",      "yahoo_px", "BZ=F", "USD/bbl", 1.0, "D", "price"),
     ("GOLD_FUT",   "Gold front future",             "yahoo_px", "GC=F", "USD/oz", 1.0, "D", "price"),
     ("HYG_PX",     "HYG",                           "yahoo_tr", "HYG",  "index", 1.0, "D", "total_return"),
     ("TLT_PX",     "TLT",                           "yahoo_tr", "TLT",  "index", 1.0, "D", "total_return"),

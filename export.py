@@ -13,6 +13,7 @@ import glob
 import json
 import math
 import os
+import re
 
 import pandas as pd
 
@@ -136,7 +137,8 @@ def main():
           [{"label": "validate.py", "value": code("validate.py"), "type": "code", "lang": "python"}])
 
     # Monthly read: the latest memo, written only from that month's facts file.
-    memos = sorted(p for p in glob.glob(os.path.join(HERE, "memos", "*.json")) if not p.endswith("_context.json"))
+    # Memo files are memos/<YYYY-MM>.json; companions (_context, _implications) are read alongside.
+    memos = sorted(p for p in glob.glob(os.path.join(HERE, "memos", "*.json")) if re.fullmatch(r"\d{4}-\d{2}\.json", os.path.basename(p)))
     if memos:
         memo = json.load(open(memos[-1]))
         rows = [dict(order=0, kind="headline", month=memo["month"], title=memo["label"], body=memo["headline"])]
@@ -185,6 +187,23 @@ def main():
                       [{"label": "positioning.py", "value": code("positioning.py"), "type": "code", "lang": "python"},
                        {"label": "Sources", "value": "CFTC Commitments of Traders (publicreporting.cftc.gov); CBOE indices via Yahoo; "
                                                      "SPY options via Yahoo; NSE F&O bhavcopy and participant-wise open interest; NSDL FPI monthly report"}])
+        # What this means for us, and the watchlist (refreshed against the latest data).
+        imp_f = os.path.join(HERE, "memos", f"{memo['month']}_implications.json")
+        if os.path.exists(imp_f):
+            imp = json.load(open(imp_f))
+            irows = [dict(kind="disclaimer", key="disclaimer", order=0, title="", body=imp["disclaimer"], note="")]
+            irows += [dict(kind="implication", key=f"imp|{i}", order=10 + i, title=x["area"], body=x["data"], note=x["why"])
+                      for i, x in enumerate(imp["implications"])]
+            irows += [dict(kind="action", key=f"act|{i}", order=100 + i, title=a["title"], body=a["consider"], note=a["revisit"])
+                      for i, a in enumerate(imp["actions"])]
+            write("implications", pd.DataFrame(irows),
+                  [{"label": "Written from", "value": f"facts_{memo['month']}, the news context and the watchlist; every number is audited by checks.py"}])
+        import watch
+        w = watch.run(memo["month"])
+        write("watch", pd.DataFrame([dict(key=f"watch|{r['id']}", order=i, **{k: v for k, v in r.items() if k != "value"})
+                                     for i, r in enumerate(w["items"])]),
+              [{"label": "watchlist.json (levels you can edit)", "value": open(os.path.join(HERE, "watchlist.json")).read()},
+               {"label": "watch.py", "value": code("watch.py"), "type": "code", "lang": "python"}])
         write("read", pd.DataFrame(rows),
               [{"label": "Facts the memo is written from", "value": open(facts_md).read() if os.path.exists(facts_md) else "missing"},
                {"label": "analysis.py", "value": code("analysis.py"), "type": "code", "lang": "python"}])

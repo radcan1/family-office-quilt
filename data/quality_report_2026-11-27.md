@@ -1,6 +1,6 @@
 # Data quality report — 2026-11-27
 
-**Series:** 77 pass · 2 warn · 0 fail  
+**Series:** 78 pass · 2 warn · 0 fail  
 
 ## Basis and cross-source checks
 
@@ -88,57 +88,25 @@
 | L1 | US_HY_OAS | US HY option-adjusted spread | fred:BAMLH0A0HYM2 | PASS | last obs 2026-11-24 (3d old, limit 5d) |
 | L1 | IN10Y | India 10Y G-Sec yield (monthly avg) | fred:INDIRLTLT01STM | PASS | last obs 2026-10-01 (57d old, limit 75d) |
 | L1 | IN3M | India 3M interbank rate (monthly avg) | fred:INDIR3TIB01STM | PASS | last obs 2026-10-01 (57d old, limit 75d) |
-| L1 | RBI_NETLIQ | RBI net liquidity (LAF+MSF+SLF-SDF) | rbi_mmo:F | WARN | last obs 2026-11-25 (2d old, limit 5d); 10 obs in last 365d — history accumulates from first run (RBI has no bulk archive) |
+| L1 | RBI_NETLIQ | RBI net liquidity (LAF+MSF+SLF-SDF) | rbi_mmo:F | WARN | last obs 2026-11-26 (1d old, limit 5d); 11 obs in last 365d — history accumulates from first run (RBI has no bulk archive) |
 | L1 | USDINR | USD/INR (FRED H.10, Yahoo for latest days) | spliced:X_USDINR_FRED+X_USDINR_YAHOO | PASS | last obs 2026-11-27 (0d old, limit 5d) |
-| L1 | DXY | US Dollar Index | yahoo_px:DX-Y.NYB | PASS | last obs 2026-11-26 (1d old, limit 5d) |
+| L1 | DXY | US Dollar Index | yahoo_px:DX-Y.NYB | PASS | last obs 2026-11-27 (0d old, limit 5d) |
 | L1 | VIX | CBOE VIX | yahoo_px:^VIX | PASS | last obs 2026-11-26 (1d old, limit 5d) |
-| L1 | INDIAVIX | India VIX | yahoo_px:^INDIAVIX | PASS | last obs 2026-11-26 (1d old, limit 5d) |
-| L1 | COPPER_FUT | Copper front future | yahoo_px:HG=F | PASS | last obs 2026-11-26 (1d old, limit 5d) |
-| L1 | GOLD_FUT | Gold front future | yahoo_px:GC=F | PASS | last obs 2026-11-26 (1d old, limit 5d) |
+| L1 | INDIAVIX | India VIX | yahoo_px:^INDIAVIX | PASS | last obs 2026-11-27 (0d old, limit 5d) |
+| L1 | COPPER_FUT | Copper front future | yahoo_px:HG=F | PASS | last obs 2026-11-27 (0d old, limit 5d) |
+| L1 | BRENT_FUT | Brent crude front future | yahoo_px:BZ=F | PASS | last obs 2026-11-27 (0d old, limit 5d) |
+| L1 | GOLD_FUT | Gold front future | yahoo_px:GC=F | PASS | last obs 2026-11-27 (0d old, limit 5d) |
 | L1 | HYG_PX | HYG | yahoo_tr:HYG | PASS | last obs 2026-11-25 (2d old, limit 5d) |
 | L1 | TLT_PX | TLT | yahoo_tr:TLT | PASS | last obs 2026-11-25 (2d old, limit 5d) |
 | L1 | RSP_PX | Equal-weight S&P 500 (RSP) | yahoo_tr:RSP | PASS | last obs 2026-11-25 (2d old, limit 5d) |
 | L1 | SPY_PX | SPY | yahoo_tr:SPY | PASS | last obs 2026-11-25 (2d old, limit 5d) |
-| X | X_NIFTY_PX | Nifty 50 price (Yahoo) | yahoo_px:^NSEI | PASS | last obs 2026-11-26 (1d old, limit 5d) |
+| X | X_NIFTY_PX | Nifty 50 price (Yahoo) | yahoo_px:^NSEI | PASS | last obs 2026-11-27 (0d old, limit 5d) |
 | X | X_NIFTY_PXNI | Nifty 50 price (NSE) | nifty_px:NIFTY 50 | PASS | last obs 2026-11-26 (1d old, limit 5d) |
 | X | X_MID_PXNI | Midcap 150 price (NSE) | nifty_px:NIFTY MIDCAP 150 | PASS | last obs 2026-11-26 (1d old, limit 5d) |
 | X | X_FMCG_PXNI | Nifty FMCG price (NSE) | nifty_px:NIFTY FMCG | PASS | last obs 2026-11-26 (1d old, limit 5d) |
 | X | X_GSEC_CLEAN | 10Y G-Sec clean price | nifty_px:NIFTY 10 YR BENCHMARK G-SEC (CLEAN PRICE) | PASS | last obs 2026-11-26 (1d old, limit 5d) |
 | X | X_USDINR_FRED | USD/INR (FRED noon NY) | fred:DEXINUS | PASS | last obs 2026-11-20 (7d old, limit 10d) |
 | X | X_USDINR_YAHOO | USD/INR (Yahoo) | yahoo_px:USDINR=X | PASS | last obs 2026-11-27 (0d old, limit 5d) |
-| X | X_GOLDBEES | Gold BeES (INR gold ETF) | yahoo_tr:GOLDBEES.NS | PASS | last obs 2026-11-25 (2d old, limit 5d) |
+| X | X_GOLDBEES | Gold BeES (INR gold ETF) | yahoo_tr:GOLDBEES.NS | PASS | last obs 2026-11-27 (0d old, limit 5d) |
 | X | X_SPY_PRICE | SPY price only | yahoo_px:SPY | PASS | last obs 2026-11-25 (2d old, limit 5d) |
 | X | X_HYG_PRICE | HYG price only | yahoo_px:HYG | PASS | last obs 2026-11-25 (2d old, limit 5d) |
-
-## Catalysts
-
-| Catalyst | Outcome | Prob | 30d Δ | Kalshi | Liquidity | Flags |
-|---|---|---|---|---|---|---|
-| Next FOMC decision | No change | 3.6% | -16.8pp | 4.5% | $3,723,390 |  |
-| Next FOMC decision | 25 bps increase | 93.5% | +17.0pp | 92.5% | $3,723,390 |  |
-| Next FOMC decision | 50+ bps increase | 2.1% | -0.1pp | 2.5% | $3,723,390 |  |
-| Number of Fed cuts this year | 0 (0 bps) | 98.4% | +2.4pp | — | $3,100,108 |  |
-| Next RBI policy decision | 50+ bps increase | 7.6% | +1.1pp | — | $18,777 | THIN |
-| Next RBI policy decision | 25 bps increase | 87.5% | +10.5pp | — | $18,777 | THIN |
-| Next RBI policy decision | No Change | 2.9% | -11.5pp | — | $18,777 | THIN |
-| Next RBI policy decision | 25 bps decrease | 0.1% | -2.2pp | — | $18,777 | THIN |
-| Next RBI policy decision | 50+ bps decrease | 0.1% | -0.3pp | — | $18,777 | THIN |
-| US recession by year-end | US recession by end of 2026? | 3.3% | -4.2pp | 3.0% | $69,566 |  |
-| US tariff rate on China at year-end | 5–15% | 87.5% | +0.5pp | — | $30,041 |  |
-| US tariff rate on China at year-end | 15–25% | 9.4% | -0.6pp | — | $30,041 |  |
-| US tariff rate on China at year-end | 35%+ | 2.2% | -1.7pp | — | $30,041 |  |
-| Bitcoin price hit before year-end | ↑ 95,000 | 1.5% | -25.1pp | — | $4,236,386 | MAJOR REPRICING |
-| Bitcoin price hit before year-end | ↓ 55,000 | 45.5% | +35.0pp | — | $4,236,386 | MAJOR REPRICING |
-| Bitcoin price hit before year-end | ↓ 45,000 | 11.2% | +7.0pp | — | $4,236,386 |  |
-| Bitcoin price hit before year-end | ↓ 35,000 | 5.2% | +3.0pp | — | $4,236,386 |  |
-| Bitcoin price hit before year-end | ↓ 50,000 | 27.3% | +19.8pp | — | $4,236,386 |  |
-| Bitcoin price hit before year-end | ↓ 40,000 | 8.2% | +5.4pp | — | $4,236,386 |  |
-| Bitcoin price hit before year-end | ↓ 30,000 | 3.2% | +1.5pp | — | $4,236,386 |  |
-| Bitcoin price hit before year-end | ↑ 90,000 | 2.9% | -41.5pp | — | $4,236,386 | MAJOR REPRICING |
-| Gold (GC) hit by end of December | ↓ $3,500 | 62.5% | +51.5pp | — | $745,293 | MAJOR REPRICING |
-| Gold (GC) hit by end of December | ↓ $3,000 | 6.6% | +3.7pp | — | $745,293 |  |
-| Gold (GC) hit by end of December | ↓ $2,500 | 2.1% | -0.3pp | — | $745,293 |  |
-| Crude oil all-time high | December 31 | 2.1% | -11.4pp | — | $243,601 |  |
-| Crude oil all-time high | March 31, 2027 | 13.5% | -13.0pp | — | $243,601 |  |
-| AI bubble burst | December 31, 2026 | 17.8% | +9.8pp | — | $127,712 |  |
-| AI bubble burst | June 30, 2027 | 36.5% | +14.0pp | — | $127,712 |  |

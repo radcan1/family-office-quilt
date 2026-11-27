@@ -17,7 +17,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCS = os.path.join(HERE, "docs")
-SETS = ["read", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"]
+SETS = ["health", "read", "implications", "watch", "context", "positioning", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts"]
 
 TOKENS = """
 :root {
@@ -121,7 +121,26 @@ def privacy_guard():
                 raise SystemExit(f"PRIVACY GUARD: {os.path.relpath(p, HERE)} references private/.")
 
 
+def health_gate():
+    """Run every check (checks.py). Refuse to publish on any FAIL unless --force.
+    Writes the results as the page's 'health' data file."""
+    import sys
+    import checks
+    h = checks.run()
+    rows = [dict(key=f"h|{i}", order=i, **r) for i, r in enumerate(h["checks"])]
+    rows.insert(0, dict(key="summary", order=-1, area="Summary", check="All checks", status="FAIL" if h["summary"]["FAIL"] else "PASS",
+                        detail=f"{h['summary']['PASS']} passed, {h['summary']['WARN']} warnings, {h['summary']['FAIL']} failures",
+                        as_of=h["as_of"], passed=h["summary"]["PASS"], warned=h["summary"]["WARN"], failed=h["summary"]["FAIL"]))
+    json.dump({"rows": rows, "meta": [{"label": "checks.py", "value": open(os.path.join(HERE, "checks.py")).read(), "type": "code", "lang": "python"}]},
+              open(os.path.join(HERE, "data", "export", "health.json"), "w"), default=str)
+    fails = [r for r in h["checks"] if r["status"] == "FAIL"]
+    if fails and "--force" not in sys.argv:
+        raise SystemExit("HEALTH GATE: not publishing. Failures:\n" + "\n".join(f"  {r['area']}: {r['check']}: {r['detail'][:150]}" for r in fails))
+    return h
+
+
 def main():
+    h = health_gate()
     page = open(os.path.join(HERE, "page", "index.html")).read()
     page = re.sub(r'<meta name="dash-[^"]+"[^>]*>\s*', "", page)        # dashboard-only markers
     summary = json.load(open(os.path.join(HERE, "data", "quilt", "summary.json")))
@@ -162,7 +181,7 @@ def main():
 """
     open(os.path.join(DOCS, "index.html"), "w").write(html)
     privacy_guard()
-    print(f"docs/index.html written ({len(html):,} bytes), data as of {as_of}; privacy guard passed")
+    print(f"docs/index.html written ({len(html):,} bytes), data as of {as_of}; health {h['summary']}; privacy guard passed")
 
 
 if __name__ == "__main__":

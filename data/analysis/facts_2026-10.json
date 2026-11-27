@@ -138,7 +138,7 @@
     {
       "question": "persistence",
       "id": "turnover",
-      "text": "2 of last month's top 5 stayed in the top 5 (INR cash, Brent). Rank correlation with last month: +0.09 (near +1 = same order, near \u22121 = reversal).",
+      "text": "2 of last month's top 5 stayed in the top 5 (Brent, INR cash). Rank correlation with last month: +0.09 (near +1 = same order, near \u22121 = reversal).",
       "flag": false,
       "numbers": {
         "kept": [

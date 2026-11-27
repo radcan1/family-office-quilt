@@ -55,6 +55,7 @@ def main():
 
     # 2. Everything else, one provider call per unique (source, id)
     raw_cache = {}
+    fell_back = set()
     # Spliced series are built from other registry rows, so they go last.
     ordered = [m for m in series if m["source"] != "spliced"] + [m for m in series if m["source"] == "spliced"]
     for m in ordered:
@@ -71,12 +72,23 @@ def main():
             else:
                 if key not in raw_cache:
                     log(f"{m['source']}: {m['source_id']}…")
-                    raw_cache[key] = sources.FETCHERS[m["source"]](m["source_id"])
+                    try:
+                        raw_cache[key] = sources.FETCHERS[m["source"]](m["source_id"])
+                    except Exception as ex:
+                        # Fall back to the last saved copy and say so, rather than drop the series.
+                        cached = sources._load_cache(m["source"], m["source_id"])
+                        if cached.empty:
+                            raise
+                        log(f"  fetch failed ({type(ex).__name__}); using cached data to {cached.index.max().date()}")
+                        raw_cache[key] = cached
+                        fell_back.add(m["id"])
                 s = raw_cache[key]
             s = (s * m["scale"]).dropna().sort_index()
             store[m["id"]] = s
             s.rename("value").rename_axis("date").to_csv(os.path.join(OUT, "daily", f"{m['id']}.csv"))
             status[m["id"]] = validate.hygiene(m, s, today)
+            if m["id"] in fell_back or any(x in fell_back for x in m["source_id"].split("+")):
+                status[m["id"]].append(("WARN", "live fetch failed this run; using the last saved copy"))
         except Exception as ex:
             status[m["id"]] = [("FAIL", f"fetch error: {type(ex).__name__}: {str(ex)[:160]}")]
             traceback.print_exc(limit=1)
