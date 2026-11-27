@@ -1,0 +1,77 @@
+{
+  "month": "2026-10",
+  "compared_with": "2026-09",
+  "compared_label": "September",
+  "changes": [
+    {
+      "importance": 10,
+      "direction": "down",
+      "text": "Regime moved from Risk-on (4 of 6) to Mixed (3 of 6): high yield/Treasuries turned defensive; equal-weight/cap-weight S&P 500 turned risk-on; cyclical vs defensive sectors turned defensive."
+    },
+    {
+      "importance": 9,
+      "direction": "down",
+      "text": "New divergence: equities versus credit. S&P 500 3-month rupee return +0.9%; high-yield spread +0.59pp over 3 months. Equities rose while credit spreads widened sharply."
+    },
+    {
+      "importance": 9,
+      "direction": "neutral",
+      "text": "The chips-versus-Indian-IT gap flipped from +21.4pp to -33.1pp, a swing of 54 points: semiconductors led in September, Indian IT now."
+    },
+    {
+      "importance": 8,
+      "direction": "down",
+      "text": "No longer a persistent leader: Bitcoin."
+    },
+    {
+      "importance": 8,
+      "direction": "down",
+      "text": "Cash is now a persistent leader (INR cash): a defensive sign, since it ranks high only when most assets fall."
+    },
+    {
+      "importance": 8,
+      "direction": "down",
+      "text": "New persistent laggard: Emerging, Silver."
+    },
+    {
+      "importance": 7,
+      "direction": "down",
+      "text": "Breadth narrowed: 4 of 19 assets rose, against 8 in September."
+    },
+    {
+      "importance": 6,
+      "direction": "up",
+      "text": "No longer a persistent laggard: UST 20Y+, Nifty 50, Midcap 150."
+    },
+    {
+      "importance": 6,
+      "direction": "neutral",
+      "text": "The rupee turned: it weakened 0.7% in September and strengthened 0.9% this month, so currency went from helping to hurting rupee returns on dollar assets."
+    },
+    {
+      "importance": 6,
+      "direction": "down",
+      "text": "US volatility rose: VIX 16.3 to 19.4."
+    },
+    {
+      "importance": 5,
+      "direction": "neutral",
+      "text": "Brent topped the quilt again (+14.5% in September, +17.7% now)."
+    },
+    {
+      "importance": 5,
+      "direction": "down",
+      "text": "India VIX rose from 13.5 to 15.3."
+    },
+    {
+      "importance": 5,
+      "direction": "down",
+      "text": "Fed net liquidity turned from rising (+0.1%) to falling (-0.6%)."
+    },
+    {
+      "importance": 4,
+      "direction": "neutral",
+      "text": "Cross-asset dispersion rose from 5.4% to 7.1%: winners and losers drifted further apart."
+    }
+  ]
+}

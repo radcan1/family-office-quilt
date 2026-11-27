@@ -165,6 +165,22 @@ window.dash = (function () {
   .fq-bar i { display: block; height: 100%; }
   .fq-out .fq-num { text-align: right; }
 
+  /* At a glance */
+  .fq-glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--cds-gap-md); }
+  .fq-glance-card { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-md); min-width: 0; }
+  .fq-know-list { margin: 0; padding: 0; list-style: none; counter-reset: know; display: flex; flex-direction: column; gap: var(--cds-gap-md); min-height: 140px; }
+  .fq-know-list li { counter-increment: know; display: grid; grid-template-columns: 30px 1fr; gap: var(--cds-gap-sm); font-size: 15px; line-height: 1.5; }
+  .fq-know-list li::before { content: counter(know); font-family: var(--font-anthropic-serif); font-size: 26px; line-height: 1; color: var(--color-fg-muted); }
+  .fq-change-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; min-height: 120px; }
+  .fq-more .fq-change-list { min-height: 0; margin-top: var(--cds-gap-sm); }
+  .fq-change-list li { display: grid; grid-template-columns: 18px 1fr; gap: 6px; font-size: 14px; line-height: 1.45; }
+  .fq-arrow { font-size: 11px; line-height: 1.9; text-align: center; }
+  .fq-arrow.fq-up { color: var(--color-ok); }
+  .fq-arrow.fq-down { color: var(--color-bad); }
+  .fq-arrow.fq-flat { color: var(--color-fg-muted); }
+  .fq .fq-more { border-top: 0; padding-top: 0; }
+  .fq .fq-more summary { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+
   /* Monthly read */
   .fq-readbox { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-lg); }
   .fq-read-head { font-family: var(--font-anthropic-serif); font-size: 19px; line-height: 1.4; max-width: 80ch; }
@@ -204,6 +220,22 @@ window.dash = (function () {
     <p class="fq-take" id="takeaway">In <b data-draw="t-month">—</b>, <b data-draw="t-top">—</b> led the quilt at <span class="fq-num" data-draw="t-topret" data-source="layer2" data-field="ret_inr">—</span> in rupees and <b data-draw="t-bot">—</b> trailed at <span class="fq-num" data-draw="t-botret" data-source="layer2" data-field="ret_inr">—</span>. The rupee <span data-draw="t-fxdir">—</span> <span class="fq-num" data-draw="t-fx" data-source="layer1" data-field="chg_1">—</span> against the dollar that month, which <span data-draw="t-fxeff">—</span> the rupee return of every dollar asset.</p>
     <p class="fq-muted">Monthly total returns, INR base. Global assets are converted at the Fed's USD/INR rate. Rankings are diagnostics for the investment committee, not trade instructions.</p>
   </header>
+
+  <section class="fq-glance" id="glance">
+    <div class="fq-glance-card" id="know">
+      <h2>Three things to know</h2>
+      <ol class="fq-know-list dash-skeleton" data-draw="know" data-source="read"></ol>
+    </div>
+    <div class="fq-glance-card" id="changed">
+      <h2>What changed since <span data-draw="changed-from">—</span></h2>
+      <ul class="fq-change-list dash-skeleton" data-draw="changes" data-source="read" data-from="0" data-to="6"></ul>
+      <details class="fq-more" id="all-changes">
+        <summary>All changes</summary>
+        <ul class="fq-change-list" data-draw="changes" data-source="read" data-from="6" data-to="99"></ul>
+      </details>
+      <p class="fq-muted">Worked out by rule from this month's and last month's facts. Up and down arrows show whether each change is good or bad for risk-taking investors.</p>
+    </div>
+  </section>
 
   <section class="fq-section fq-readbox" id="read">
     <div class="fq-sechead">
@@ -442,6 +474,40 @@ window.dash = (function () {
     el.replaceChildren(...d.rows.filter(r => r.kind === 'question').sort((a, b) => a.order - b.order).map(r => {
       const li = document.createElement('li'); li.dataset.source = 'read'; li.dataset.field = 'body'; li.dataset.where = 'order=' + r.order;
       li.textContent = r.body; return li;
+    }));
+  });
+
+  // ── At a glance: three things to know, what changed ──────────────────────
+  dash.draw('know', (el) => {
+    const d = readRows();
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the summary');
+    FQ.done(el);
+    el.replaceChildren(...d.rows.filter(r => r.kind === 'know').sort((a, b) => a.order - b.order).map(r => {
+      const li = document.createElement('li'); li.dataset.source = 'read'; li.dataset.field = 'body'; li.dataset.where = 'order=' + r.order;
+      const s = document.createElement('span'); s.textContent = r.body; li.append(s); return li;
+    }));
+  });
+  dash.draw('changed-from', (el) => {
+    const r = readRows().rows.find(x => x.kind === 'change');
+    el.textContent = r ? r.title : 'last month';
+  });
+  dash.draw('changes', (el) => {
+    const d = readRows();
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the changes');
+    FQ.done(el);
+    const all = d.rows.filter(r => r.kind === 'change').sort((a, b) => a.order - b.order);
+    const items = all.slice(+el.dataset.from || 0, +el.dataset.to || all.length);
+    el.replaceChildren(...items.map(r => {
+      const li = document.createElement('li');
+      const a = document.createElement('span');
+      a.className = 'fq-arrow ' + (r.direction === 'up' ? 'fq-up' : r.direction === 'down' ? 'fq-down' : 'fq-flat');
+      a.textContent = r.direction === 'up' ? '▲' : r.direction === 'down' ? '▼' : '●';
+      a.setAttribute('aria-label', r.direction === 'up' ? 'Positive' : r.direction === 'down' ? 'Negative' : 'Neutral');
+      const t = document.createElement('span'); t.dataset.source = 'read'; t.dataset.field = 'body'; t.dataset.where = 'order=' + r.order;
+      t.textContent = r.body;
+      li.append(a, t); return li;
     }));
   });
 

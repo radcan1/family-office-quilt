@@ -144,6 +144,17 @@ def main():
                  for i, s in enumerate(memo["sections"], start=1)]
         rows += [dict(order=100 + i, kind="question", month=memo["month"], title="", body=q)
                  for i, q in enumerate(memo["questions"], start=1)]
+        rows += [dict(order=50 + i, kind="know", month=memo["month"], title="", body=k)
+                 for i, k in enumerate(memo.get("know", []), start=1)]
+        # What changed since last month: worked out by rule in changes.py.
+        import changes
+        prev = (pd.Period(memo["month"], "M") - 1).strftime("%Y-%m")
+        if os.path.exists(os.path.join(HERE, "data", "analysis", f"facts_{prev}.json")):
+            ch = changes.compare(memo["month"])
+            json.dump(ch, open(os.path.join(HERE, "data", "analysis", f"changes_{memo['month']}.json"), "w"), indent=2)
+            rows += [dict(order=200 + i, kind="change", month=memo["month"], title=ch["compared_label"],
+                          body=c["text"], direction=c["direction"], importance=c["importance"])
+                     for i, c in enumerate(ch["changes"], start=1)]
         facts_md = os.path.join(HERE, "data", "analysis", f"facts_{memo['month']}.md")
         import context
         ctx = context.latest()

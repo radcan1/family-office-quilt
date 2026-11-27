@@ -4,6 +4,11 @@
   "facts_file": "data/analysis/facts_2026-10.json",
   "written": "2026-11-27",
   "headline": "October was narrow and oil-led: only 4 of 19 assets rose in rupees, and the regime reads Mixed, with credit and sector leadership turning defensive.",
+  "know": [
+    "Markets turned cautious. Our market-mood gauge slipped from risk-on in September to mixed in October, and only 4 of 19 investments rose in rupees, half as many as the month before.",
+    "Oil is the big story. Fear of a wider Iran war pushed Brent crude up 17.7% in rupees in October and 41% over three months. It is the only risk asset that has led for three months running.",
+    "Interest rates are heading up, not down. Markets give a 94% chance that the US Fed raises rates on 9 December and 88% that the RBI does on 4 December, because inflation is above both central banks' targets."
+  ],
   "sections": [
     {
       "title": "Regime: Mixed, leaning defensive",

@@ -235,7 +235,8 @@ def main():
           flag=len(dis) > 0, checked=len(chk), disagree=len(dis))
 
     # Liquidity backdrop (context for regime and divergence)
-    m2, rbi = ind("GLOBAL_M2"), l1[l1.key == "RBI_NETLIQ"].sort_values("month").tail(1)
+    m2 = ind("GLOBAL_M2")
+    rbi = l1[(l1.key == "RBI_NETLIQ") & (l1.month <= M)].sort_values("month").tail(1)   # only readings from this month or earlier
     F.add("regime", "liquidity",
           f"Fed net liquidity ${nl.value:,.0f}bn ({pct(nl.chg_1)} on the month, {pct(nl.chg_3)} over 3 months); "
           f"Global M2 {pct(m2.chg_1)} year on year, {pct(m2.chg_3)} annualised over 3 months"
