@@ -1,0 +1,148 @@
+{
+  "month": "2026-10",
+  "label": "October 2026",
+  "researched": "2026-11-27",
+  "rules": "Explanations start from a flagged fact in facts_2026-10.json, are written in our own words, and cite their sources. Confirmed = several reliable outlets agree on the cause. Likely = one solid source or a strong indirect link. Unclear = no clear cause found.",
+  "drivers": [
+    {
+      "id": "oil",
+      "fact": "Brent crude led the quilt: +17.7% in rupees in October, +41.0% over 3 months.",
+      "why": "Fear that the US/Israel–Iran war would escalate pushed oil up all month. Houthi missile and drone strikes on Saudi Arabia and an attack on a tanker in the Strait of Hormuz added supply risk, freight costs jumped, and Brent passed $110 on 16 October for the first time since May. OPEC+ kept output targets unchanged on 31 October, so no extra supply came to offset it.",
+      "note": "Reported Brent futures rose about 13.6% in October; the quilt's +18.8% dollar figure is the BNO fund, which tracks front-month futures and rolls contracts, so it can differ from headline Brent.",
+      "confidence": "Confirmed",
+      "themes": ["middle_east_energy"],
+      "sources": [
+        {"outlet": "Bloomberg", "title": "Oil tops $110 for first time since May as supply risk grows", "date": "2026-10-16", "url": "https://www.bloomberg.com/news/articles/2026-10-16/oil-tops-110-for-first-time-since-may-as-supply-risk-grows"},
+        {"outlet": "Nation Thailand", "title": "Brent ends October up 13.6% as Iran war risks unsettle markets", "date": "2026-10-31", "url": "https://www.nationthailand.com/news/world/40072956"},
+        {"outlet": "Al Jazeera", "title": "Oil flows are up as Iran war turmoil eases. Why do prices keep rising?", "date": "2026-10-30", "url": "https://www.aljazeera.com/economy/2026/10/30/oil-flows-are-up-as-iran-war-turmoil-eases-why-do-prices-keep-rising"},
+        {"outlet": "CNBC", "title": "OPEC+ keeps December oil output targets steady", "date": "2026-10-31", "url": "https://www.cnbc.com/2026/10/31/opec-oil-output-targets-december.html"}
+      ]
+    },
+    {
+      "id": "fed",
+      "fact": "Prediction markets moved to a 94% chance of a 25bp Fed hike in December, up from 76% thirty days earlier; no Fed cuts this year at 98%.",
+      "why": "US inflation is running well above target, with core PCE at 3.3%. Minutes of the October Fed meeting showed nearly all officials expecting a December hike, and in November Governor Waller said a hike was likely and a half-point move possible if inflation disappoints. The policy rate is 3.75–4.00%; a hike would take it to 4.00–4.25%.",
+      "confidence": "Confirmed",
+      "themes": ["fed_policy"],
+      "sources": [
+        {"outlet": "ABC News", "title": "Fed minutes: Higher interest rates needed in December as inflation worries mount", "date": "2026-11", "url": "https://abcnews.com/US/wireStory/fed-minutes-higher-interest-rates-needed-december-inflation-138258781"},
+        {"outlet": "CNBC", "title": "Fed Governor Waller sees December hike likely", "date": "2026-11-10", "url": "https://www.cnbc.com/2026/11/10/fed-governor-waller-sees-december-hike-likely.html"},
+        {"outlet": "Kalshi", "title": "Fed meeting December 2026: rate decision odds", "date": "2026-11-27", "url": "https://kalshi.com/markets/kxfeddecision/fed-meeting/kxfeddecision-26dec"}
+      ]
+    },
+    {
+      "id": "chips_vs_india_it",
+      "fact": "Semiconductors (SMH) fell 15.0% in rupees while Nifty IT rose 18.1%: a 33.1pp gap.",
+      "why": "Two separate stories met. US chip stocks sold off on worries about the cost and payback of AI infrastructure, rising bond yields and crowded positioning: the Philadelphia semiconductor index fell eight sessions in a row to mid-October, its longest losing run since 2008, and Intel fell 30% in a day on 30 October. Indian IT rallied on TCS's September-quarter results and fading worry about US visa curbs; the Nifty IT index had its best week since 2008 in the week to 16 October as investors rotated out of expensive AI stocks.",
+      "confidence": "Confirmed",
+      "themes": ["ai_capex"],
+      "sources": [
+        {"outlet": "Yahoo Finance", "title": "Chip stocks just fell 8 days in a row, their longest losing streak since 2008", "date": "2026-10-16", "url": "https://finance.yahoo.com/markets/stocks/articles/chip-stocks-just-fell-8-161520543.html"},
+        {"outlet": "Coinpaper (citing Reuters)", "title": "Indian IT stocks surge 11.7% in their best week since 2008 as Nasdaq falls amid AI selloff", "date": "2026-10-16", "url": "https://coinpaper.com/37443/infosys-tcs-and-tech-mahindra-rally-up-to-18-as-indian-it-stocks-record-best-week-in-18-years"},
+        {"outlet": "Analytics Insight", "title": "Indian IT stocks rally 4% on TCS Q2 results", "date": "2026-10-09", "url": "https://www.analyticsinsight.net/amp/story/news/indian-it-stocks-rally-4-on-tcs-q2-results-perm-worries-fade"}
+      ]
+    },
+    {
+      "id": "metals",
+      "fact": "Silver was the worst asset (−18.9% in rupees) and gold fell 7.5%; markets now give 62% odds of gold falling to $3,500 by December.",
+      "why": "The oil spike revived inflation fears and pushed up expectations of higher rates for longer, which hurts metals that pay no interest. Strong US growth and inflation data firmed up December hike bets, and a Wall Street selloff on 30 October triggered liquidation: silver closed below $50 for the first time since November 2025. Silver also suffered from worries about industrial demand, so it fell more than twice as hard as gold.",
+      "confidence": "Confirmed",
+      "themes": ["fed_policy", "dollar_risk_appetite"],
+      "sources": [
+        {"outlet": "Kitco", "title": "Gold falls below $3,900, silver tumbles as Wall Street selloff triggers liquidation", "date": "2026-10-30", "url": "https://www.kitco.com/news/article/2026-10-30/gold-falls-below-3900-silver-tumbles-wall-street-selloff-triggers"},
+        {"outlet": "GoldSilver", "title": "Gold and silver's October selloff: what changed for long-term owners?", "date": "2026-10-31", "url": "https://goldsilver.com/industry-news/goldsilver-news/gold-silver-october-selloff-2026/"}
+      ]
+    },
+    {
+      "id": "rbi",
+      "fact": "India's 10-year yield rose 0.32pp to 7.38% in October; markets price an 88% chance of another 25bp RBI hike in December (thin market).",
+      "why": "The RBI raised the repo rate by 25bp to 5.50% in October, and retail inflation reached 6.09% in October, above the RBI's 6% upper limit. A Reuters poll found over 90% of economists expecting a further 25bp hike on 4 December, and Axis Bank's economists see a 50bp move as possible, with 10-year yields heading toward 7.5%.",
+      "confidence": "Confirmed",
+      "themes": ["rbi_india_policy"],
+      "sources": [
+        {"outlet": "SME Futures", "title": "RBI MPC December 2026: 25 bps repo rate hike emerges as base case", "date": "2026-11", "url": "https://smefutures.com/rbi-mpc-december-2026-25-bps-repo-rate-hike/"},
+        {"outlet": "Free Press Journal", "title": "RBI eyes December rate hike; 50 bps move on radar", "date": "2026-11", "url": "https://www.freepressjournal.in/business/rbi-eyes-december-rate-hike-strong-growth-sticky-inflation-put-50-bps-move-on-radar"},
+        {"outlet": "Nation Press", "title": "RBI 50 bps rate hike possible in December, says Axis Bank report", "date": "2026-11-26", "url": "https://www.nationpress.com/business/rbi-may-go-big-with-50-bps-hike-in-december"}
+      ]
+    },
+    {
+      "id": "treasuries",
+      "fact": "US 20Y+ Treasuries rose 5.6% in dollars (+4.7% in rupees) in October even as Fed hike odds climbed.",
+      "why": "The likeliest reason is safe-haven buying: as chip and AI stocks sold off, investors moved money into government bonds, pulling long yields down. We found one report describing this rotation, and it fits the November pattern, when each tech selloff came with falling Treasury yields.",
+      "confidence": "Likely",
+      "themes": ["fed_policy", "ai_capex"],
+      "sources": [
+        {"outlet": "Yahoo Finance", "title": "Chipmaker sell-off sends investors to other stocks and bonds for safety", "date": "2026-10", "url": "https://finance.yahoo.com/markets/stocks/articles/global-tech-selloff-deepens-enthusiasm-104622434.html"}
+      ]
+    },
+    {
+      "id": "em",
+      "fact": "Emerging markets fell 9.5% in rupees and are a persistent laggard (−5.2% over 3 months).",
+      "why": "The AI selloff hit Asian technology stocks, which are a large part of the emerging-market index, while rising Fed hike bets and a firmer dollar pulled money out of emerging markets. Reports describe both forces, but we could not pin down a single dated October event.",
+      "confidence": "Likely",
+      "themes": ["ai_capex", "dollar_risk_appetite", "fed_policy"],
+      "sources": [
+        {"outlet": "Yahoo Finance", "title": "AI selloff drags emerging stocks down, weighs on currency gauge", "date": "2026", "url": "https://finance.yahoo.com/markets/currencies/articles/ai-selloff-drags-emerging-stocks-204545101.html"},
+        {"outlet": "LSE.co.uk (Reuters)", "title": "EM stocks retreat from record highs as AI selloff, Fed hike fears weigh", "date": "2026", "url": "https://www.lse.co.uk/news/emerging-markets-em-stocks-retreat-from-record-highs-as-ai-selloff-fed-hike-fears-weigh-aqt9tpe4gcxnj9f.html"}
+      ]
+    },
+    {
+      "id": "bitcoin",
+      "fact": "Bitcoin fell 8.2% in rupees in October (down 15 places), and in November markets slashed the odds of it reaching $90,000 this year from 44% to 3%.",
+      "why": "Bitcoin traded with the tech selloff and suffered from rising rate expectations in October. The bigger fall came in November, when forced selling of leveraged positions and record outflows from US bitcoin funds took it to about $62,000 by mid-month; that November slide is what the prediction-market repricing reflects.",
+      "confidence": "Likely",
+      "themes": ["dollar_risk_appetite"],
+      "sources": [
+        {"outlet": "CNBC", "title": "Bitcoin slides to $62,000 following liquidation cascade, then rebounds slightly", "date": "2026-11-16", "url": "https://www.cnbc.com/2026/11/16/bitcoin-slides-to-62000-following-liquidation-cascade-then-rebounds-slightly.html"}
+      ]
+    },
+    {
+      "id": "credit",
+      "fact": "The US high-yield spread widened 0.59pp over three months to 3.44% while the S&P 500 still rose.",
+      "why": "We found no report naming a specific cause. Wider spreads fit the backdrop of higher expected rates and the tech selloff, but that is our inference, not a reported driver.",
+      "confidence": "Unclear",
+      "themes": ["fed_policy"],
+      "sources": []
+    },
+    {
+      "id": "rupee",
+      "fact": "The rupee strengthened 0.9% against the dollar in October.",
+      "why": "We found no October-specific explanation. Reports from November credit the rupee's strength to recovering equity inflows and, from early November, lower oil prices, but oil was still rising in October, so those reasons don't clearly apply to this month.",
+      "confidence": "Unclear",
+      "themes": ["dollar_risk_appetite"],
+      "sources": [
+        {"outlet": "investingLive", "title": "OCBC sees the Indian rupee strengthening to 92.10 per dollar by end-2027 as oil relief builds", "date": "2026-11", "url": "https://investinglive.com/forex/ocbc-sees-the-indian-rupee-strengthening-to-92-10-per-dollar-by-end-2027-as-oil-relief-builds"}
+      ]
+    }
+  ],
+  "themes": [
+    {"id": "middle_east_energy", "status": "active", "direction": 1,
+     "summary": "Iran war escalation fears, Houthi strikes on Saudi Arabia and a Hormuz tanker attack drove oil higher all month."},
+    {"id": "fed_policy", "status": "active", "direction": 1,
+     "summary": "Sticky inflation moved markets toward a December hike; officials signalled more tightening."},
+    {"id": "rbi_india_policy", "status": "active", "direction": 1,
+     "summary": "The RBI hiked 25bp to 5.50% in October with inflation above its 6% ceiling."},
+    {"id": "ai_capex", "status": "active", "direction": -1,
+     "summary": "A reversal: worries about AI costs and payback drove the longest chip-stock losing streak since 2008."},
+    {"id": "russia_ukraine", "status": "active", "direction": 1,
+     "summary": "A claimed energy ceasefire on 11 October did not hold; both sides kept striking energy infrastructure while US-brokered talks continued."},
+    {"id": "dollar_risk_appetite", "status": "active", "direction": 1,
+     "summary": "Risk appetite fell as tech sold off and rate expectations rose; the dollar index edged up 0.4%."},
+    {"id": "us_china_trade", "status": "quiet", "direction": 1,
+     "summary": "Quiet in October under the existing truce. It flared on 25 November with proposed tariffs of up to 20% on 14 economies, including China and India."}
+  ],
+  "calendar": [
+    {"date": "2026-11-29", "event": "OPEC+ ministerial meeting", "why": "Sets 2027 production quotas; Gulf members are still pumping below targets because of Iran-war export disruptions.", "catalyst": "OIL_ATH",
+     "source": {"outlet": "CNBC", "url": "https://www.cnbc.com/2026/10/31/opec-oil-output-targets-december.html"}},
+    {"date": "2026-12-04", "event": "RBI policy decision (MPC meets 2–4 December)", "why": "A 25bp hike is the consensus; a 50bp move is possible.", "catalyst": "RBI_NEXT",
+     "source": {"outlet": "SME Futures", "url": "https://smefutures.com/rbi-mpc-december-2026-25-bps-repo-rate-hike/"}},
+    {"date": "2026-12-09", "event": "Fed decision and new projections (FOMC meets 8–9 December)", "why": "A 25bp hike is priced in; the projections will show how many more hikes officials expect in 2027.", "catalyst": "FOMC_NEXT",
+     "source": {"outlet": "Kalshi", "url": "https://kalshi.com/markets/kxfeddecision/fed-meeting/kxfeddecision-26dec"}},
+    {"date": "2026-12", "event": "US–China leaders' summit in Miami", "why": "Comes weeks before the trade truce expires, with new Section 301 tariffs of up to 20% proposed on 25 November.", "catalyst": "TARIFF_CHINA",
+     "source": {"outlet": "CNBC", "url": "https://www.cnbc.com/2026/11/25/us-tariffs-trump-section-301.html"}},
+    {"date": "2026-12-23", "event": "US PCE inflation for November", "why": "The Fed's preferred inflation gauge; a hot reading would raise odds of more hikes in early 2027.", "catalyst": "FOMC_NEXT",
+     "source": {"outlet": "Babypips", "url": "https://www.babypips.com/news/headline-the-feds-favorite-inflation-gauge-just-locked-in-a-december-hike-2026-11-27"}},
+    {"date": "2027-01-10", "event": "US–China trade truce expires", "why": "Without an extension, tariffs could rise; a US official said rates could reach 40% if talks break down.", "catalyst": "TARIFF_CHINA",
+     "source": {"outlet": "CNBC", "url": "https://www.cnbc.com/2026/11/25/us-tariffs-trump-section-301.html"}}
+  ]
+}

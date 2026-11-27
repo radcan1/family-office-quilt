@@ -1,0 +1,61 @@
+{
+  "about": "Standing watchlist of themes that move money for an INR-based family office. Each month, analysis checks which themes were active in the news and whether their linked assets moved the way the theme implies. Asset ids match registry.py; catalyst keys match registry.CATALYSTS.",
+  "themes": [
+    {
+      "id": "middle_east_energy",
+      "name": "Middle East and energy supply",
+      "why_it_matters": "Supply disruptions or OPEC+ decisions move crude, which feeds India's import bill, inflation and the rupee.",
+      "assets_up_if_active": ["BRENT", "US_XLE", "IN_ENERGY"],
+      "assets_down_if_active": ["IN_AUTO"],
+      "catalysts": ["OIL_ATH"]
+    },
+    {
+      "id": "us_china_trade",
+      "name": "US–China trade and tariffs",
+      "why_it_matters": "Tariffs and export rules hit emerging markets, global supply chains and semiconductors.",
+      "assets_up_if_active": [],
+      "assets_down_if_active": ["EM", "US_SMH", "COPPER"],
+      "catalysts": ["TARIFF_CHINA"]
+    },
+    {
+      "id": "fed_policy",
+      "name": "Fed policy and US rates",
+      "why_it_matters": "Fed hikes lift the dollar and yields, pressure long bonds and growth stocks, and pull money from emerging markets.",
+      "assets_up_if_active": ["US_CASH"],
+      "assets_down_if_active": ["US_LT_TSY", "US_TECH", "EM", "GOLD"],
+      "catalysts": ["FOMC_NEXT", "FED_CUTS_YR", "US_RECESSION"]
+    },
+    {
+      "id": "rbi_india_policy",
+      "name": "RBI and Indian policy",
+      "why_it_matters": "RBI rate moves and liquidity drive Indian banks, bonds and mid/small caps; the budget and GST set fiscal direction.",
+      "assets_up_if_active": ["IN_CASH"],
+      "assets_down_if_active": ["IN_GSEC10", "IN_REALTY", "IN_MID", "IN_SMALL"],
+      "catalysts": ["RBI_NEXT"]
+    },
+    {
+      "id": "ai_capex",
+      "name": "AI spending and chip export rules",
+      "why_it_matters": "AI capex drives semiconductors and mega-cap tech; export controls and valuation worries can reverse it. Indian IT services can benefit or lose from AI adoption.",
+      "assets_up_if_active": ["US_SMH", "US_TECH", "US_XLK"],
+      "assets_down_if_active": [],
+      "catalysts": ["AI_BUBBLE"]
+    },
+    {
+      "id": "russia_ukraine",
+      "name": "Russia–Ukraine and Europe",
+      "why_it_matters": "Escalation or ceasefire moves energy, gold, European equities and defence spending.",
+      "assets_up_if_active": ["GOLD", "BRENT"],
+      "assets_down_if_active": ["DM_EXUS"],
+      "catalysts": []
+    },
+    {
+      "id": "dollar_risk_appetite",
+      "name": "Dollar strength and global risk appetite",
+      "why_it_matters": "A strong dollar and falling risk appetite hurt emerging markets, commodities and crypto; it also lifts rupee returns on dollar assets.",
+      "assets_up_if_active": ["US_CASH"],
+      "assets_down_if_active": ["EM", "BTC", "SILVER", "COPPER"],
+      "catalysts": ["BTC_YE", "GOLD_YE"]
+    }
+  ]
+}

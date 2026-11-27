@@ -136,7 +136,7 @@ def main():
           [{"label": "validate.py", "value": code("validate.py"), "type": "code", "lang": "python"}])
 
     # Monthly read: the latest memo, written only from that month's facts file.
-    memos = sorted(glob.glob(os.path.join(HERE, "memos", "*.json")))
+    memos = sorted(p for p in glob.glob(os.path.join(HERE, "memos", "*.json")) if not p.endswith("_context.json"))
     if memos:
         memo = json.load(open(memos[-1]))
         rows = [dict(order=0, kind="headline", month=memo["month"], title=memo["label"], body=memo["headline"])]
@@ -145,6 +145,12 @@ def main():
         rows += [dict(order=100 + i, kind="question", month=memo["month"], title="", body=q)
                  for i, q in enumerate(memo["questions"], start=1)]
         facts_md = os.path.join(HERE, "data", "analysis", f"facts_{memo['month']}.md")
+        import context
+        ctx = context.latest()
+        if ctx and ctx["month"] == memo["month"]:
+            write("context", pd.DataFrame(context.rows_for_page(ctx)),
+                  [{"label": "Researched context (sources in each row)", "value": json.dumps(ctx, indent=1, ensure_ascii=False)},
+                   {"label": "context.py", "value": code("context.py"), "type": "code", "lang": "python"}])
         write("read", pd.DataFrame(rows),
               [{"label": "Facts the memo is written from", "value": open(facts_md).read() if os.path.exists(facts_md) else "missing"},
                {"label": "analysis.py", "value": code("analysis.py"), "type": "code", "lang": "python"}])

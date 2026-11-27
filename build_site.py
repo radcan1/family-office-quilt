@@ -17,7 +17,7 @@ import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCS = os.path.join(HERE, "docs")
-SETS = ["read", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"]
+SETS = ["read", "context", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"]
 
 TOKENS = """
 :root {

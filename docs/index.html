@@ -56,7 +56,7 @@ body { font: 15px/1.45 var(--font-anthropic-sans); -webkit-font-smoothing: antia
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
 window.dash = (function () {
-  const SETS = ["read", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"];
+  const SETS = ["read", "context", "layer2", "layer3_in", "layer3_us", "layer1", "catalysts", "quality"];
   const store = {}; SETS.forEach(s => { store[s] = { status: 'loading', data: [] }; });
   const draws = new Map();
   let started = false;
@@ -175,6 +175,21 @@ window.dash = (function () {
   .fq-qs { display: flex; flex-direction: column; gap: var(--cds-gap-sm); border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
   .fq-qs ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; max-width: 90ch; }
 
+  /* News context */
+  .fq-drivers { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--cds-gap-md); min-height: 200px; }
+  .fq-driver { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-md) var(--cds-pad-lg); display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .fq-driver-fact { font-weight: var(--cds-font-weight-medium); font-size: 14px; line-height: 1.45; }
+  .fq-driver p { font-size: 14px; line-height: 1.55; }
+  .fq-driver .fq-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fq-srcs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fq-srcs a, .fq-table a { color: var(--series-2, var(--color-fg)); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+  .fq-themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--cds-gap-md); min-height: 160px; }
+  .fq-theme { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-md); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .fq-theme-h { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); align-items: baseline; }
+  .fq-theme-h strong { font-weight: var(--cds-font-weight-medium); }
+  .fq-theme p { font-size: 13.5px; line-height: 1.5; }
+  .fq-score { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+
   .fq details { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
   .fq summary { cursor: pointer; font-weight: var(--cds-font-weight-medium); }
   .fq dl.fq-defs { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: var(--cds-gap-sm) var(--cds-gap-lg); margin: var(--cds-gap-md) 0 0; font-size: var(--cds-font-size-caption); }
@@ -200,6 +215,36 @@ window.dash = (function () {
     <div class="fq-qs" id="read-questions">
       <h3>Questions for the committee</h3>
       <ol data-draw="read-questions" data-source="read"></ol>
+    </div>
+  </section>
+
+  <section class="fq-section" id="why">
+    <div class="fq-sechead">
+      <h2>Why it likely happened</h2>
+      <span class="fq-muted">The news behind this month's flagged facts, with sources and how sure we are</span>
+    </div>
+    <div class="fq-drivers dash-skeleton" data-draw="drivers" data-source="context"></div>
+    <p class="fq-muted">Confirmed means several reliable outlets agree on the cause. Likely means one solid source or a strong indirect link. Unclear means we found no clear cause, so we say so rather than guess.</p>
+  </section>
+
+  <section class="fq-section" id="themes">
+    <div class="fq-sechead">
+      <h2>Geopolitical themes</h2>
+      <span class="fq-muted">Which themes were active, and whether the assets they usually move went the expected way (local-currency returns)</span>
+    </div>
+    <div class="fq-themes dash-skeleton" data-draw="themes" data-source="context"></div>
+  </section>
+
+  <section class="fq-section" id="coming-up">
+    <div class="fq-sechead">
+      <h2>Coming up</h2>
+      <span class="fq-muted">Scheduled events and how prediction markets price them today</span>
+    </div>
+    <div class="fq-tablewrap">
+      <table class="fq-table" data-source="context" data-row-key="key" aria-label="Upcoming events">
+        <thead><tr><th data-field="confidence">Date</th><th data-field="title">Event</th><th data-field="body">Why it matters</th><th data-field="note">Market odds</th><th data-field="s1_outlet">Source</th></tr></thead>
+        <tbody data-draw="calendar"></tbody>
+      </table>
     </div>
   </section>
 
@@ -397,6 +442,87 @@ window.dash = (function () {
     el.replaceChildren(...d.rows.filter(r => r.kind === 'question').sort((a, b) => a.order - b.order).map(r => {
       const li = document.createElement('li'); li.dataset.source = 'read'; li.dataset.field = 'body'; li.dataset.where = 'order=' + r.order;
       li.textContent = r.body; return li;
+    }));
+  });
+
+  // ── News context: drivers, themes, calendar ──────────────────────────────
+  const safeLink = (url, text) => {
+    if (!/^https?:\/\//.test(url || '')) { const s = document.createElement('span'); s.textContent = text; return s; }
+    const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = text; return a;
+  };
+  const LONG_MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const niceDate = (s) => {
+    const p = String(s || '').split('-');
+    if (p.length === 3) return (+p[2]) + ' ' + MON[+p[1] - 1] + ' ' + p[0];
+    if (p.length === 2) return LONG_MON[+p[1] - 1] + ' ' + p[0];
+    return s || '—';
+  };
+  const ctxRows = (kind) => { const d = FQ.rows('context'); return { status: d.status, rows: d.rows.filter(r => r.kind === kind).sort((a, b) => a.order - b.order) }; };
+  const mark = (el, field, key) => { el.dataset.source = 'context'; el.dataset.field = field; el.dataset.where = 'key=' + key; return el; };
+
+  dash.draw('drivers', (el) => {
+    const d = ctxRows('driver');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the news context');
+    FQ.done(el);
+    el.replaceChildren(...d.rows.map(r => {
+      const card = document.createElement('article'); card.className = 'fq-driver'; card.id = 'why-' + r.key.split('|')[1];
+      const pill = document.createElement('span');
+      pill.className = 'fq-pill' + (r.confidence === 'Confirmed' ? ' fq-up' : r.confidence === 'Likely' ? ' fq-warn' : '');
+      pill.textContent = r.confidence;
+      const top = document.createElement('div'); top.append(pill);
+      const fact = mark(document.createElement('div'), 'title', r.key); fact.className = 'fq-driver-fact'; fact.textContent = r.title;
+      const why = mark(document.createElement('p'), 'body', r.key); why.textContent = r.body;
+      card.append(top, fact, why);
+      if (r.note) { const n = document.createElement('p'); n.className = 'fq-note'; n.textContent = r.note; card.append(n); }
+      const ul = document.createElement('ul'); ul.className = 'fq-srcs';
+      for (let j = 1; j <= 4; j++) {
+        if (!r['s' + j + '_outlet']) continue;
+        const li = document.createElement('li');
+        li.append(r['s' + j + '_outlet'] + ': ', safeLink(r['s' + j + '_url'], r['s' + j + '_title'] || 'source'), r['s' + j + '_date'] ? ' (' + niceDate(r['s' + j + '_date']) + ')' : '');
+        ul.append(li);
+      }
+      if (!ul.children.length) { const li = document.createElement('li'); li.textContent = 'No source found for a specific cause.'; ul.append(li); }
+      card.append(ul);
+      return card;
+    }));
+  });
+
+  dash.draw('themes', (el) => {
+    const d = ctxRows('theme');
+    if (d.status === 'loading') { el.replaceChildren(); return; }
+    if (d.status !== 'ok') return FQ.failed(el, 'the themes');
+    FQ.done(el);
+    const rows = d.rows.slice().sort((a, b) => (a.confidence === 'active' ? 0 : 1) - (b.confidence === 'active' ? 0 : 1) || a.order - b.order);
+    el.replaceChildren(...rows.map(r => {
+      const card = document.createElement('div'); card.className = 'fq-theme'; card.id = 'theme-' + r.key.split('|')[1];
+      const h = document.createElement('div'); h.className = 'fq-theme-h';
+      const t = document.createElement('strong'); t.textContent = r.title;
+      const pill = document.createElement('span'); pill.className = 'fq-pill' + (r.confidence === 'active' ? ' fq-warn' : '');
+      pill.textContent = r.confidence === 'active' ? 'Active' : 'Quiet';
+      h.append(t, pill);
+      const s = mark(document.createElement('p'), 'body', r.key); s.textContent = r.body;
+      card.append(h, s);
+      if (r.confidence === 'active' && r.total) {
+        const sc = document.createElement('div'); sc.className = 'fq-score';
+        const n = mark(document.createElement('b'), 'hits', r.key); n.textContent = r.hits;
+        sc.append(n, ' of ' + r.total + ' linked assets moved the expected way');
+        const det = document.createElement('div'); det.className = 'fq-muted'; det.textContent = r.note;
+        card.append(sc, det);
+      }
+      return card;
+    }));
+  });
+
+  dash.draw('calendar', (tb) => {
+    const d = ctxRows('event');
+    if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    tb.replaceChildren(...d.rows.map(r => {
+      const tr = document.createElement('tr'); tr.dataset.key = r.key;
+      const td = (txt, cls) => { const c = document.createElement('td'); c.textContent = txt; if (cls) c.className = cls; return c; };
+      const src = document.createElement('td'); src.className = 'fq-l'; src.append(safeLink(r.s1_url, r.s1_outlet || 'source'));
+      tr.append(td(niceDate(r.confidence)), td(r.title, 'fq-l'), td(r.body, 'fq-l'), td(r.note || '—', 'fq-l'), src);
+      return tr;
     }));
   });
 
