@@ -121,7 +121,7 @@ window.dash = (function () {
   .fq-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
   .fq-scroll { overflow-x: auto; position: relative; }
   .fq-wrap { position: relative; }
-  .fq-quilt { display: grid; gap: 3px; min-height: 300px; }
+  .fq-quilt { display: grid; gap: 3px; min-height: 300px; position: relative; }
   .fq-quilt.fq-small { min-height: 240px; }
   .fq-colhead { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-align: center; padding-bottom: 2px; white-space: nowrap; }
   .fq-colhead.fq-mtd { font-style: italic; }
@@ -409,17 +409,19 @@ window.dash = (function () {
   });
 
   // ── Layer 1 cards ────────────────────────────────────────────────────────
+  // Returns [prefix, number, suffix]: only the number goes in the marked element,
+  // so the dashboard can match it to the data (a unit like "bn" would read as a multiplier).
   function fmtValue(r) {
     const v = +r.value;
     switch (r.units) {
-      case 'USD bn': return '$' + Math.round(v).toLocaleString('en-US') + 'bn';
-      case 'USD tn': return '$' + v.toFixed(2) + 'tn';
-      case 'INR cr': return '₹' + Math.round(v).toLocaleString('en-IN') + ' cr';
-      case '%': return v.toFixed(2) + '%';
-      case 'pp': return FQ.signed(v) + 'pp';
-      case 'INR': return '₹' + v.toFixed(2);
-      case 'index': return v.toFixed(1);
-      default: return v.toFixed(3);
+      case 'USD bn': return ['$', Math.round(v).toLocaleString('en-US'), ' bn'];
+      case 'USD tn': return ['$', v.toFixed(2), ' tn'];
+      case 'INR cr': return ['₹', Math.round(v).toLocaleString('en-IN'), ' cr'];
+      case '%': return ['', v.toFixed(2), '%'];
+      case 'pp': return ['', FQ.signed(v), 'pp'];
+      case 'INR': return ['₹', v.toFixed(2), ''];
+      case 'index': return ['', v.toFixed(1), ''];
+      default: return ['', v.toFixed(3), ''];
     }
   }
   function fmtChange(r, which) {
@@ -443,8 +445,11 @@ window.dash = (function () {
       const row = document.createElement('div'); row.className = 'fq-ind'; row.id = 'ind-' + r.key.split('|')[1];
       const lab = document.createElement('div'); lab.className = 'fq-ind-label'; lab.textContent = r.label;
       const val = document.createElement('div'); val.className = 'fq-ind-val';
-      val.dataset.source = 'layer1'; val.dataset.field = 'value'; val.dataset.where = 'key=' + r.key;
-      val.textContent = fmtValue(r);
+      const [pre, numTxt, suf] = fmtValue(r);
+      const num = document.createElement('span');
+      num.dataset.source = 'layer1'; num.dataset.field = 'value'; num.dataset.where = 'key=' + r.key;
+      num.textContent = numTxt;
+      val.append(pre, num, suf);
       const chg = document.createElement('div'); chg.className = 'fq-ind-chg';
       const asof = ' · as of ' + r.obs_date;
       if (r.change_type === 'level') {
@@ -510,9 +515,9 @@ window.dash = (function () {
     el.replaceChildren(...frag);
 
     // Tooltip and highlight live inside this drawing.
-    const wrap = el.closest('.fq-wrap');
-    let tip = wrap.querySelector('.fq-tip');
-    if (!tip) { tip = document.createElement('div'); tip.className = 'fq-tip'; tip.hidden = true; wrap.append(tip); }
+    // The tooltip lives inside the grid itself, so this drawing writes only to its own element.
+    const wrap = el;
+    const tip = document.createElement('div'); tip.className = 'fq-tip'; tip.hidden = true; el.append(tip);
     const byKey = new Map(d.rows.map(r => [r.key, r]));
     let pinned = null;
     const highlight = (id) => {
@@ -537,6 +542,7 @@ window.dash = (function () {
       const wr = wrap.getBoundingClientRect(), cr = c.getBoundingClientRect();
       let x = cr.right - wr.left + 6, y = cr.top - wr.top;
       if (x + 270 > wr.width) x = Math.max(0, cr.left - wr.left - 266);
+      y = Math.min(y, Math.max(0, wr.height - tip.offsetHeight - 4));   // keep it inside the grid
       tip.style.left = x + 'px'; tip.style.top = Math.max(0, y) + 'px';
     };
     el.onmouseover = (e) => { const c = e.target.closest('.fq-cell'); if (!c) return; if (!pinned) highlight(c.dataset.id); show(c); };
